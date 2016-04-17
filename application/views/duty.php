@@ -16,6 +16,8 @@
 
 	<legend><?php echo $legend; ?></legend>
 	
+	<div id="infoMessage"><?php echo $message; ?></div>
+	
 	<input name="id" value="<?php echo $id; ?>" hidden></input>
 	
 	<fieldset><div class="pure-g">

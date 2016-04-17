@@ -5,9 +5,6 @@ if (isset($shifts[$slot_id])) {
 	foreach ($shifts[$slot_id] as $shift) {
 		echo "<p>\n";
 		
-		if (! $shift['duty']['locked']) {
-			echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">\n";
-		}
 		
 		echo '<span class="duty-time">';
 		if (isset($shift['start']) && isset($shift['end'])) {
@@ -19,19 +16,21 @@ if (isset($shifts[$slot_id])) {
 		}
 		echo "</span>\n";
 		
+		if (! $shift['duty']['locked']) {
+			echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">\n";
+		}
 		echo "<span class=\"duty-user\">{$shift['duty']['user']}</span><br/>\n";
-
-		echo "<span class=\"duty-comment\">{$shift['duty']['comment']}</span>\n";
-		
 		if (! $shift['duty']['locked']) {
 			echo "</a>";
 		}
+
+		echo "<span class=\"duty-comment\">{$shift['duty']['comment']}</span>\n";
 		
 		echo "</p>\n";
 	}
 } else {
-	echo "<p>leer</p>";
+	echo "<p></p>";
 }
 if ($add) {
-	echo form_checkbox('shift-'.$shift_id, $slot_id, false);
+	echo form_checkbox('shift-'.$shift_id, $slot_id, false, 'class="shift-slot-select"');
 }

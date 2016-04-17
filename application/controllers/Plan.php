@@ -87,13 +87,16 @@ class Plan extends CI_Controller {
 		$data['menu']		= true;
 		$data['menu_id']	= 'plan';
 		
+		// try to get a message about what went wrong if anything
+		$data['message'] = $this->session->flashdata('message');
+		
 		if (! empty($year) && empty($month)) {
 			redirect('plan/show', 'redirect');
 		}
 		
 		// Check and set year/month
 		$now	 		= time();
-		$display_date	= $this->_check_year_month($year, $month, $now);
+		$display_date	= $this->_check_year_month($now, $year, $month);
 		$year			= $display_date['year'];
 		$month			= $display_date['month'];
 		
@@ -104,12 +107,14 @@ class Plan extends CI_Controller {
 		$cur_year	= $cur_date['year'];
 		$cur_shift	= $this->_get_current_shift_id($year, $month, $now);
 		
-		$allow_add	= $cur_shift;
+		$allow_add	= $cur_shift === '0-0' ? '1-0' : $cur_shift;
 		if ($this->ion_auth->is_admin()) {
 			$allow_add = '1-0'; // always
 		} else if ((int) $year < (int) $cur_year || (int) $month < (int) $cur_month) {
 			$allow_add = 'never';
-		} 
+		}
+		
+		list($shifts, $continuity) = $this->_prepare_view_shifts($year, $month);
 		
 		// Start passing data to the view
 		$data['year']		= $year;
@@ -117,7 +122,8 @@ class Plan extends CI_Controller {
 		$data['days']		= $this->plan_model->get_days($year, $month);
 		$data['day_names']	= $this->calendar->get_day_names();
 		$data['vehicles']	= $this->plan_model->get_active_vehicles($now);
-		$data['shifts']		= $this->_prepare_view_shifts($year, $month);
+		$data['shifts']		= $shifts;
+		$data['continuity']	= $continuity;
 		$data['disp_times'] = $this->config->item('shift_display_times', 'dienstplan');
 		$data['allow_add']	= $allow_add;
 		$data['cur_day']	= (int) explode('-', $cur_shift)[0];
@@ -306,8 +312,9 @@ class Plan extends CI_Controller {
 			unset($_POST['user_id']);
 		}
 		
-		$duties = $this->_prefix_key_to_subarray($this->input->post(null));
-		$fail	= false;
+		$duties 		= $this->_prefix_key_to_subarray($this->input->post(null));
+		$insert_duties	= array();
+		$fail			= false;
 		
 		foreach ($duties as $duty) {
 			if (empty($duty['start']) || empty($duty['end'])) {
@@ -326,16 +333,17 @@ class Plan extends CI_Controller {
 			$duty['start']		= $start;
 			$duty['end']		= $end;
 			
-			if (! $this->plan_model->insert_dutytime($duty)) {
-				$fail = true;
-				continue;
-			}
+			$insert_duties[]	= $duty;
 		}
 		
 		if ($fail) {
-			// TODO: message
+			$this->session->set_flashdata('message', $this->plan_model->errors() ? $this->plan_model->errors() : '<p>Ungültige Dienstzeiten</p>');
+		}
+		
+		if ($this->plan_model->insert_batch_dutytimes($insert_duties)) {
+			$this->session->set_flashdata('message', '<p>Dienst(e) wurde(n) erfolgreich eingetragen</p>');
 		} else {
-			// TODO: other message
+			$this->session->set_flashdata('message', $this->plan_model->errors());
 		}
 		redirect("plan/show/{$year}/{$month}", 'redirect');
 	}
@@ -352,92 +360,108 @@ class Plan extends CI_Controller {
 		$data['menu']		= true;
 		$data['menu_id']	= 'plan';
 		
+		$now = time();
 		
-		$time = time();
 		$this->load->library('form_validation');
 		
-		$this->form_validation->set_rules('vehicle', 'Fahrzeug', 'required|is_natural');
-		$this->form_validation->set_rules('startdate', 'Dienstanfang', 'required');
-		$this->form_validation->set_rules('starttime', 'Dienstanfang', 'required');
-		$this->form_validation->set_rules('enddate', 'Dienstende', 'required');
-		$this->form_validation->set_rules('endtime', 'Dienstende', 'required');
-		$this->form_validation->set_rules('user_id', 'Fahrer', 'required');
-		$this->form_validation->set_rules('comment', 'Kommentar', 'max_length[250]');
-		if (isset($_POST['modify']) || isset($_POST['delete'])) {
+		// For modify and delete the id is needed
+		if (isset($_POST['delete'])) {
 			$this->form_validation->set_rules('id', 'ID', 'required|is_natural');
-		} else {
-			$this->form_validation->set_rules('add', 'Anfragetyp', 'required');
-		}
-		
-		if ($this->form_validation->run() === true) {
-			$start	= strtotime($_POST['startdate'] .' '. $_POST['starttime']);
-			$end	= strtotime($_POST['enddate'] .' '. $_POST['endtime']);
 			
-			if (isset($start) && isset($end) && $start < $end 
-					&& (($start > $time) || $this->ion_auth->is_admin())) {
-				list($year, $month) = $this->plan_model->check_year_month('', '', $start);
-				$vehicles			= $this->plan_model->get_active_vehicles($now);
-				$user				= $this->ion_auth->user($_POST['user_id']);
+		} else {
+			if (isset($_POST['modify'])) {
+				$this->form_validation->set_rules('id', 'ID', 'required|is_natural');
+			} else {
+				$this->form_validation->set_rules('add', 'Anfragetyp', 'required');
+			}
+			
+			// modify and add require more values
+			$this->form_validation->set_rules('vehicle', 'Fahrzeug', 'required|is_natural');
+			$this->form_validation->set_rules('startdate', 'Dienstanfang', 'required');
+			$this->form_validation->set_rules('starttime', 'Dienstanfang', 'required|exact_length[5]');
+			$this->form_validation->set_rules('enddate', 'Dienstende', 'required');
+			$this->form_validation->set_rules('endtime', 'Dienstende', 'required|exact_length[5]');
+			$this->form_validation->set_rules('user_id', 'Fahrer', 'required|is_natural');
+			$this->form_validation->set_rules('comment', 'Kommentar', 'max_length[100]|trim|htmlspecialchars');
+		}		
+		
+		// We just require some basic parameters here and leave the checking to the model
+		if ($this->form_validation->run() === true) {
 				
-				if (isset($vehicles[$_POST['vehicle']]) && isset($user)) {
-					$result = null;
-					
-					if (isset($_POST['delete'])) {
-						$result = $this->plan_model->delete_dutytime($_POST['id']);
-					} else if (isset($_POST['modify'])) {
-						$result = $this->plan_model->replace_dutytime(array(
-							'id'		=> $_POST['id'],
-							'start'		=> $start,
-							'end'		=> $end,
-							'vehicle'	=> $_POST['vehicle'],
-							'user_id'	=> $_POST['user_id'],
-							'comment'	=> $_POST['comment'],
-						));;
-					} else {
-						$result = $this->plan_model->insert_dutytime(array(
-							'start'		=> $start,
-							'end'		=> $end,
-							'vehicle'	=> $_POST['vehicle'],
-							'user_id'	=> $_POST['user_id'],
-							'comment'	=> $_POST['comment'],
-						));
-					}
-					print_r($result);
-					
-					/* TODO: check result */
-					if ($result) {
-						redirect("plan/show/{$year}/{$month}", 'redirect');
-					}
+			$result = null; // result of the performed action
+			$time	= $now; // time to use for redirecting the user
+			
+			// Determine which action to perform	
+			if (isset($_POST['delete'])) {
+				$result = $this->plan_model->delete_dutytime($this->input->post('id'));
+				
+			} else {
+				$start	= strtotime($this->input->post('startdate') .' '. $this->input->post('starttime'));
+				$end	= strtotime($this->input->post('enddate') .' '. $this->input->post('endtime'));
+				$time	= $start;
+				
+				if (isset($_POST['modify'])) {
+					$result = $this->plan_model->replace_dutytime(array(
+						'id'		=> $this->input->post('id'),
+						'start'		=> $start,
+						'end'		=> $end,
+						'vehicle'	=> $this->input->post('vehicle'),
+						'user_id'	=> $this->input->post('user_id'),
+						'comment'	=> $this->input->post('comment'),
+					));;
+				} else {
+					$result = $this->plan_model->insert_dutytime(array(
+						'start'		=> $start,
+						'end'		=> $end,
+						'vehicle'	=> $this->input->post('vehicle'),
+						'user_id'	=> $this->input->post('user_id'),
+						'comment'	=> $this->input->post('comment'),
+					));
 				}
 			}
+			
+			$display_date	= $this->_check_year_month($time);
+			$year			= $display_date['year'];
+			$month			= $display_date['month'];
+			
+			/* TODO: check result */
+			if ($result) {
+				redirect("plan/show/{$year}/{$month}", 'redirect');
+				return;
+			} else {
+				$this->session->set_flashdata('message', $this->plan_model->errors());
+			}
 		}
+			
+		// try to get a message about what went wrong if anything
+		$data['message'] = validation_errors() ? 
+			validation_errors() : $this->session->flashdata('message');
 		
 		$duty_id	= (int) $duty_id;
 		$duty		= $this->plan_model->get_duty($duty_id);
 		
 		if (! isset($duty)) {
+			$data['title']	= 'Dienst hinzufügen';
+			
 			$duty = array(
 				'id'		=> '',
-				'start'		=> $time,
-				'end'		=> $time,
-				'vehicle'	=> isset($_POST['vehicle']) ? $_POST['vehicle'] : 0,
-				'user_id'	=> isset($_POST['user_id']) ? $_POST['user_id'] : $this->ion_auth->get_user_id(),
+				'start'		=> $now,
+				'end'		=> $now,
+				'vehicle'	=> $this->input->post('vehicle'),
+				'user_id'	=> $this->input->post('user_id') ? $this->input->post('user_id') : $this->ion_auth->get_user_id(),
 				'comment'	=> '',
 			);
-			$data['title']	= 'Dienst hinzufügen';
 		} else {
-			$time			= $duty['start'];
 			$data['title']	= 'Dienst bearbeiten';
 		}
 		
 		$data = array_merge($data, $duty, array(
-			'startdate'	=> isset($_POST['startdate']) ? $_POST['startdate'] : date($this->_date_format, $duty['start']),
-			'starttime'	=> isset($_POST['starttime']) ? $_POST['starttime'] : date('H', $duty['start']) .':00',
-			'enddate'	=> isset($_POST['enddate']) ? $_POST['enddate'] : date($this->_date_format, $duty['end']),
-			'endtime'	=> isset($_POST['endtime']) ? $_POST['endtime'] : date('H', $duty['end']) .':00',
+			'startdate'	=> $this->input->post('startdate') ? $this->input->post('startdate') : date($this->_date_format, $duty['start']),
+			'starttime'	=> $this->input->post('starttime') ? $this->input->post('starttime') : date('H', $duty['start']) .':00',
+			'enddate'	=> $this->input->post('enddate') ? $this->input->post('enddate') : date($this->_date_format, $duty['end']),
+			'endtime'	=> $this->input->post('endtime') ? $this->input->post('endtime') : date('H', $duty['end']) .':00',
 		));
 		
-		list($year, $month) = $this->plan_model->check_year_month('', '', $time);
 		$data['user_names']	= $this->user_model->get_user_names(); /* TODO: active */
 		$data['vehicles']	= $this->plan_model->get_active_vehicles($now);
 		$data['time_list']	= $this->_time_list;
@@ -445,6 +469,9 @@ class Plan extends CI_Controller {
 		$this->load->template('duty', $data);
 	}
 	
+	/*
+	 * Splits the array $a into subarrays by spliting the original keys.
+	 */
 	function _prefix_key_to_subarray($a) {
 		$ret = array();
 		
@@ -474,24 +501,25 @@ class Plan extends CI_Controller {
 		$year			= (int) $year;
 		$month			= (int) $month;
 		
-		$shift_times	= $this->config->item('shift_start_times', 'dienstplan');
-		$first_shift	= $shift_times[0];
+		$shift_times_count	= count($this->config->item('shift_start_times', 'dienstplan'));
 		
-		// Increment month by one because the last shift could end in the next month
-		$adjusted_date		= $this->calendar->adjust_date($month + 1, $year);
-		$end_month			= $adjusted_date['month'];
-		$end_year			= $adjusted_date['year'];
-		
-		// Month start/end as defined by the shifts
-		$month_start	= strtotime("01-{$month}-{$year} {$first_shift}");
-		$month_end		= strtotime("01-{$end_month}-{$end_year} {$first_shift}");
-
 		// Get the number of days in the given month
 		$total_days		= $this->calendar->get_total_days($month, $year);
+		
+		// Increment month by one because the last shift could end in the next month
+		list($end_year, $end_month) = $this->_increment_month($year, $month);
+		// Month start/end as defined by the shifts
+		$month_start	= $this->_get_first_shift_start($year, $month);
+		$month_end		= $this->_get_first_shift_start($end_year, $end_month);
+		
 		// Fetch the unprepared duty times from the model
 		$dutytimes		= $this->plan_model->get_dutytimes($month_start, $month_end)->result_array();
+		
 		// Array for the resulting shifts as used by the view
 		$shifts			= array();
+		// Array of starts and ends for continuity checking per shift
+		$starts			= array();
+		$ends			= array();
 		
 		// Fill this array from the dutytimes
 		foreach ($dutytimes as $duty) {
@@ -523,36 +551,88 @@ class Plan extends CI_Controller {
 			
 			// For each day split the duties into shifts as used by the view
 			for ($day = $duty_start_day; $day <= $duty_end_day; $day++) {
-				$next_day = $day + 1;
-				
-				$shift_times_count = count($shift_times);
 				
 				// Loop over the shifts
 				for ($i = 0; $i < $shift_times_count; $i++) {
-					$i_next		= $i + 1;
-					$end_day	= $day;
+					$i_next		= ($i + 1) % $shift_times_count;
 					
-					if ($i_next === $shift_times_count) {
-						$i_next = 0;
-						$end_day++;
-					}
+					$shift_id		= "{$day}-{$i}";
+					$shift_start	= $this->_get_shift_start($year, $month, $shift_id);
+					$shift_end		= $this->_get_shift_end($year, $month, $shift_id);
 					
-					$cur	= $shift_times[$i];
-					$next	= $shift_times[$i_next];
-					
-					$shift_start	= strtotime("{$day}-{$month}-{$year} {$cur}");
-					$shift_end		= strtotime("{$end_day}-{$month}-{$year} {$next}");
 					$shift			= $this->_prepare_shift($duty, $shift_start, $shift_end, "{$day}-{$i}");
 					
 					if (isset($shift)) {
-						$slot_id			= "{$day}-{$i}-{$duty['vehicle']}";
-						$shifts[$slot_id][]	= $shift;
+						$slot_id				= "{$day}-{$i}-{$duty['vehicle']}";
+						
+						$shifts[$slot_id][]		= $shift;
+						$starts[$shift_id][]	= $duty['start'];
+						$ends[$shift_id][]		= $duty['end'];
 					}
 				}
 			}
 		}
 		
-		return $shifts;
+		// Array for the continuity per shift
+		$continuity = array();
+		foreach (array_keys($starts) as $shift_id) {
+			$shift_start	= $this->_get_shift_start($year, $month, $shift_id);
+			$shift_end		= $this->_get_shift_end($year, $month, $shift_id);
+			
+			$continuity[$shift_id] = $this->_determine_continuation(
+				array($shift_start, $shift_start), $shift_end, $starts[$shift_id], $ends[$shift_id]);
+		}
+		
+		return array($shifts, $continuity);
+	}
+	
+	function _get_shift_start($year, $month, $shift_id) {
+		$v		= explode('-', $shift_id, 2);
+		$day	= $v[0];
+		$shift	= $v[1];
+		
+		$shift_times = $this->config->item('shift_start_times', 'dienstplan');
+		
+		return strtotime("{$day}-{$month}-{$year} {$shift_times[$shift]}");
+	}
+	
+	function _get_shift_end($year, $month, $shift_id) {
+		$v		= explode('-', $shift_id, 2);
+		$day	= (int) $v[0];
+		$shift	= ((int) $v[1]) + 1;
+		
+		$shift_times = $this->config->item('shift_start_times', 'dienstplan');
+		
+		if ($shift === count($shift_times)) {
+			$shift = 0;
+			list($year, $month, $day) = $this->_increment_day($year, $month, $day);
+		}
+		
+		return strtotime("{$day}-{$month}-{$year} {$shift_times[$shift]}");
+	}
+	
+	function _increment_day($year, $month, $day) {
+		$day = (int) $day;
+		$day++;
+		
+		if ($day >= $this->calendar->get_total_days($month, $year)) {
+			$day = 1;
+			list($year, $month) = $this->_increment_month($year, $month);
+		}
+		
+		return array($year, $month, $day);
+	}
+	
+	function _increment_month($year, $month) {
+		$day = (int) $month;
+		$month++;
+		
+		if ($month === 13) {
+			$month = 1;
+			$year++;
+		}
+		
+		return array($year, $month);
 	}
 	
 	/*
@@ -647,7 +727,7 @@ class Plan extends CI_Controller {
 	 * Returns valid values for year and month. If unset the values are
 	 * set from $time.
 	 */
-	function _check_year_month($year = '', $month = '', $time = null) {
+	function _check_year_month($time = null, $year = '', $month = '') {
 		if (! isset($time)) {
 			$time = time();
 		}
@@ -686,6 +766,34 @@ class Plan extends CI_Controller {
 		}
 		
 		return $cur_shift;
+	}
+	
+	function _determine_continuation($offsets, $endtime, $starts, $ends) {
+		array_multisort($starts, SORT_NUMERIC, $ends);
+		sort($offsets, SORT_NUMERIC);
+		
+		while ($offsets[0] < $endtime && ! empty($starts)) {
+			$start	= array_shift($starts);
+			$end	= array_shift($ends);
+			
+			if ($start <= $offsets[0]) {
+				$offsets[0] = $end;
+			} else if (! array_shift($starts) || ! array_shift($ends)) {
+				break;
+			}
+			
+			sort($offsets, SORT_NUMERIC);
+		}
+		
+		while (! empty($offsets) && $offsets[0] < $endtime) {
+			array_shift($offsets);
+		}
+		
+		return count($offsets);
+	}
+	
+	public function test() {
+		var_dump($this->_determine_continuation(array(100, 100), 300, array( 100, 50, 155, 150, 10, 250 ), array( 160, 150, 250, 290, 300, 350 )));
 	}
 	
 }

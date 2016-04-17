@@ -2,8 +2,27 @@
 
 class Plan_model extends CI_Model {
 	
+	protected $errors;
+	
+	protected $error_messages = array(
+		'start_before_end'
+			=> 'Die Anfangszeit des Diensts darf nicht vor der Endzeit liegen',
+		'conflicting_duty' 
+			=> 'Dienst überschneidet sich mit einem deiner anderen Dienste',
+		'no_permission_to_add'
+			=> 'Du darfst dich für diesen Dienst nicht mehr eintragen',
+		'no_permission_to_edit'
+			=> 'Du darfst diesen Dienst nicht mehr verändern oder löschen',
+		'nonexistant_duty'
+			=> 'Dieser Dienst existiert nicht mehr',
+	);
+	
+	protected $error_start_delimiter	= '<p>';
+	protected $error_end_delimiter		= '</p>';
+	
 	public function __construct()
 	{
+		$errors = array();
 		$this->load->database();
 	}
 	
@@ -85,6 +104,10 @@ class Plan_model extends CI_Model {
 	 * Returns the duty with $id.
 	 */
 	public function get_duty($id) {
+		if (! $id) {
+			return null;
+		}
+		
 		$locked_before = $this->get_lock_end_time();
 		
 		$this->_duty_select();
@@ -127,8 +150,11 @@ class Plan_model extends CI_Model {
 	 * Returns all duties of $user_id overlapping with $start and $end
 	 * times.
 	 */
-	public function get_conflicting_dutytimes($user_id, $start, $end) {	
+	public function get_conflicting_dutytimes($user_id, $start, $end, $duty_id = null) {	
 		$this->_duty_select();
+		if ($duty_id) {
+			$this->db->where('id !=', $duty_id);
+		}
 		$this->db->where('user_id', $user_id);
 		$this->db->group_start();
 			// 1. All duties containing this interval
@@ -159,15 +185,7 @@ class Plan_model extends CI_Model {
 	 */
 	public function insert_dutytime($duty) {
 		
-		if (! $this->validate_dutytime($duty)) {
-			return false;
-		}
-		
-		if (! $this->is_allowed_to_add($duty)) {
-			return false;
-		}
-		
-		if (! $this->is_not_conflicting($duty)) {
+		if (! $this->check_insert_dutytime($duty)) {
 			return false;
 		}
 		
@@ -175,12 +193,53 @@ class Plan_model extends CI_Model {
 	}
 	
 	/*
+	 * Batch inserts multiples duties into the DB as one transaction.
+	 */
+	public function insert_batch_dutytimes($duties) {
+		
+		foreach ($duties as &$duty) {
+			if (! $this->check_insert_dutytime($duty)) {
+				return false;
+			}
+		}
+		
+		return $this->db->insert_batch('dutytimes', $duties);
+	}
+	
+	/*
+	 * Checks whether $duty is a valid duty for insertion.
+	 */
+	public function check_insert_dutytime(&$duty) {
+		
+		if (! $this->validate_dutytime($duty)) {
+			return false;
+		}
+		
+		if (! $this->is_allowed_to_add($duty)) {
+			$this->set_error('no_permission_to_add');
+			return false;
+		}
+		
+		if (! $this->is_not_conflicting($duty)) {
+			$this->set_error('conflicting_duty');
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/*
 	 * Deletes the duty with $id.
 	 */
 	public function delete_dutytime($id) {
-		$duty = $this->get_duty($id);
-		if (! $this->ion_auth->is_admin()
-				&& ($duty['locked']	|| $duty['user_id'] !== $this->ion_auth->get_user_id())) {
+		
+		if (! $this->is_existing_duty_id($id)) {
+			$this->set_error('nonexistant_duty');
+			return false;
+		}
+		
+		if (! $this->is_allowed_to_edit($duty)) {
+			$this->set_error('no_permission_to_edit');
 			return false;
 		}
 		
@@ -191,27 +250,28 @@ class Plan_model extends CI_Model {
 	 * Replaces the duty in the DB with $duty.
 	 */
 	public function replace_dutytime($duty) {
-		if (! isset($duty['id']) || ! isset($duty['start']) || ! isset($duty['end'])
-				|| ! isset($duty['vehicle']) || ! isset($duty['user_id'])) {
+		
+		if (! $this->validate_dutytime($duty, true)) {
 			return false;
 		}
 		
-		$duty['start']		= (int) $duty['start'];
-		$duty['end']		= (int) $duty['end'];
-		$duty['vehicle']	= (int) $duty['vehicle'];
-		$duty['user_id']	= (int) $duty['user_id'];
+		if (! $this->is_existing_duty_id($duty['id'])) {
+			$this->set_error('nonexistant_duty');
+			return false;
+		}
 		
-		$user		= $this->ion_auth->user($duty['user_id'])->row();
-		$conflicts	= $this->get_conflicting_dutytimes($duty['user_id'], $duty['start'], $duty['end'])->num_rows();
+		if (! $this->is_allowed_to_edit($duty['id'])) {
+			$this->set_error('no_permission_to_edit');
+			return false;
+		}
 		
-		if (! $this->ion_auth->is_admin()
-				&& ($old_duty['locked'] 
-				|| $old_duty['user_id'] !== $this->ion_auth->get_user_id())
-				|| ! $this->is_valid_vehicle($duty['vehicle'])
-				|| ! $this->is_valid_unix_time($duty['start'])
-				|| ! $this->is_valid_unix_time($duty['end'])
-				|| ! isset($user->id) || $conflicts !== 1 || $duty['start'] >= $duty['end'])
-		{
+		if (! $this->is_allowed_to_add($duty)) {
+			$this->set_error('no_permission_to_add');
+			return false;
+		}
+		
+		if (! $this->is_not_conflicting($duty)) {
+			$this->set_error('conflicting_duty');
 			return false;
 		}
 		
@@ -229,25 +289,9 @@ class Plan_model extends CI_Model {
 	}
 	
 	/*
-	 * Validates whether the number $vehicle represents a valid vehicle.
+	 * Validates all values of $duty and optionally with $check_id the
+	 * id field. Additionally all values are converted to int's.
 	 */
-	public function is_valid_vehicle($vehicle) {
-		if ($vehicle < 0 || $vehicle > 1) {
-			return false;
-		}
-		return true;
-	}
-	
-	/*
-	 * Validates whether $time is a valid unix time.
-	 */
-	public function is_valid_unix_time($time) {
-		if ($time < 0) {
-			return false;
-		}
-		return true;
-	}
-	
 	public function validate_dutytime(&$duty, $check_id = false) {
 		if (! isset($duty['start']) || ! isset($duty['end'])
 				|| ! isset($duty['vehicle']) || ! isset($duty['user_id'])) {
@@ -275,35 +319,121 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
-		if (! $this->is_valid_unix_time($duty['start'])) {
+		if (! $this->is_valid_start_end($duty['start'], $duty['end'])) {
+			$this->set_error('start_before_end');
 			return false;
 		}
 		
-		if (! $this->is_valid_unix_time($duty['end'])) {
+		if (! $this->is_valid_comment($duty['comment'])) {
+			$this->set_error('comment_too_long');
+			return false;
+		}
+			
+		return true;
+	}
+	
+	/*
+	 * Validates whether the number $vehicle represents a valid vehicle.
+	 */
+	public function is_valid_vehicle($vehicle) {
+		if ($vehicle < 0 || $vehicle > 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	/*
+	 * Validates whether $time is a valid unix time.
+	 */
+	public function is_valid_unix_time($time) {
+		if ($time < 0) {
+			return false;
+		}
+		return true;
+	}
+	
+	/*
+	 * Validates wheter $comment is a valid duty comment.
+	 */
+	public function is_valid_comment($comment) {
+		return is_string($comment) && strlen($comment) < 255;
+	}
+	
+	/*
+	 * Checks whether $start and $end are unix times and $start < $end.
+	 */
+	public function is_valid_start_end($start, $end) {
+		if (! $this->is_valid_unix_time($start)) {
 			return false;
 		}
 		
-		if ($duty['start'] >= $duty['end']) {
+		if (! $this->is_valid_unix_time($end)) {
+			return false;
+		}
+		
+		if ($start >= $end) {
 			return false;
 		}
 		
 		return true;
 	}
 	
-	public function is_allowed_to_edit($duty) {
-		$old_duty = $this->get_duty($duty['id']);
-		
-		return $this->ion_auth->is_admin() || $old_duty['locked'] === false;
+	/*
+	 * Checks whether a duty with $duty_id already exists.
+	 */
+	public function is_existing_duty_id($duty_id) {
+		return $this->get_duty($duty_id);
 	}
 	
+	/*
+	 * Checks whether the current user is allowed to edit $duty_id.
+	 */
+	public function is_allowed_to_edit($duty_id) {
+		$old_duty = $this->get_duty($duty_id);
+		
+		if (! $this->ion_auth->is_admin()) {
+			if ($old_duty['locked']) {
+				return false;
+			}
+			
+			if ($old_duty['user_id'] !== $this->ion_auth->get_user_id()) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * Determines whether the current user is allowed to add $duty.
+	 */
 	public function is_allowed_to_add($duty) {
 		return $this->ion_auth->is_admin() || $duty['end'] >= time();
 	}
 	
+	/*
+	 * Checks whether $duty overlaps with another duty of the current
+	 * user.
+	 */
 	public function is_not_conflicting($duty) {
-		$conflicts = $this->get_conflicting_dutytimes($duty['user_id'], $duty['start'], $duty['end'])->num_rows();
+		$conflicts = $this->get_conflicting_dutytimes($duty['user_id'], $duty['start'], $duty['end'], 
+			isset($duty['id']) ? $duty['id'] : null);
 		
-		return $conflicts === 0;
+		return $conflicts->num_rows() === 0;
+	}
+	
+	public function set_error($error) {
+		$this->errors[] = $error;
+	}
+	
+	public function errors() {
+		$msg = '';
+		
+		foreach ($this->errors as $error) {
+			$msg .= $this->error_start_delimiter . $this->error_messages[$error] . $this->error_end_delimiter;
+		}
+		
+		return $msg;
 	}
 	
 }

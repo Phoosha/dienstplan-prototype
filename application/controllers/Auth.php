@@ -61,12 +61,12 @@ class Auth extends CI_Controller {
 			} else if ($this->ion_auth->login($user, $password, $remember)) {
 				// successfull login
 				
-				// prepare a message about failed login attempts
-				$last_login = date('j.n.Y G:i', $this->session->old_last_login);
-				$message = "<p>Seit Ihrer letzten Anmeldung am $last_login, gab es $attempts fehlgeschlagene Anmeldeversuche.</p>";
-				
-				// pass the message if there were any failed attempts
-				$this->session->set_flashdata('message', ($attempts > 0) ? $message : $this->ion_auth->messages());
+				// display a message if there were failed attempts
+				if ($attempts > 0) {
+					$last_login = date('j.n.Y G:i', $this->session->old_last_login);
+					$message = "<p>Seit Ihrer letzten Anmeldung am $last_login, gab es $attempts fehlgeschlagene(n) Anmeldeversuch(e).</p>";
+					$this->session->set_flashdata('message', $message);
+				}
 				
 				// redirect to the original page if possible
 				redirect(isset($_SESSION['return_to']) ? $_SESSION['return_to'] : '/', 'refresh');

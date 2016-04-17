@@ -1,3 +1,6 @@
+/****************************************************************
+ * Datepicker locale
+ ****************************************************************/
 ( function( factory ) {
 	if ( typeof define === "function" && define.amd ) {
 
@@ -35,6 +38,9 @@ return datepicker.regional.de;
 } ) );
 
 
+/****************************************************************
+ * Mobile hidden menu
+ ****************************************************************/
 $('#menuLink').on('click', function(e) {
 	e.preventDefault();
 	
@@ -44,11 +50,17 @@ $('#menuLink').on('click', function(e) {
 });
 
 
+/****************************************************************
+ * Checkbox select on within group by name
+ ****************************************************************/
 $('input[type="checkbox"]').on('change', function() {
     $('input[name="' + this.name + '"]').not(this).prop('checked', false);
 });
 
 
+/****************************************************************
+ * Setup datepicker
+ ****************************************************************/
 $(function() {
 	$.datepicker.setDefaults( $.datepicker.regional[ "de" ] );
 	$("#startdate-picker").datepicker({
@@ -67,4 +79,33 @@ $(function() {
 			$(this).attr("disabled", true);
 		}
 	});
+});
+
+
+/****************************************************************
+ * Make shift slots selectable
+ ****************************************************************/
+ // Hide the checkbox with javascript
+$('input[class="shift-slot-select"]').attr("style", "display: none");
+
+// Update checkbox and cell on click
+$('td.shift-slot').on('click', function() {
+	var checkbox = $(this).find('input[type="checkbox"]');
+	var selected = !checkbox.prop('checked');
+	
+	if (checkbox.length > 0) {
+		checkbox.prop('checked', selected);
+		$(this).toggleClass('selected', selected);
+		
+		// allow only one checkbox to be selected per group (=shift)
+		$('input[name="' + $(checkbox).attr('name') + '"]').not($(checkbox)).prop('checked', false);
+		$('td[name="' + $(this).attr('name') + '"]').not($(this)).toggleClass('selected', false);
+	} else {
+		window.alert("Diese Schicht ist gesperrt!");
+	}
+});
+
+// Do not change selection when clicking links
+$('td.shift-slot a').on('click', function(event) {
+	event.stopPropagation();
 });

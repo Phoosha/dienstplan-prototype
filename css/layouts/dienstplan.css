@@ -409,11 +409,53 @@ label {
 	margin: 0 auto;
 }
 
-.today {
-	border-left: 1px solid #c55;
-	border-right: 1px solid #c55;
+.weekend {
+	background: #eee;
 }
 
-.today td {
-	background: #FFFFE1;
+.today {
+/*
+	border-left: 1px solid #c55;
+	border-right: 1px solid #c55;
+*/
+	background: #bee;
+}
+
+td.shift-slot {
+	background-color: #cfc;
+}
+
+td.empty-slot {
+	background-color: #fcb;
+}
+
+td.alone-slot {
+	background-color: #ffb;
+}
+
+td.selected {
+	background-color: #9df;
+}
+
+.shift-slot {
+	width: 10em;
+	height: 7em;
+}
+
+.shift-slot p {
+	line-height: 1.2;
+}
+
+.duty-time {
+	font-size: 105%;
+	color: #777
+}
+
+.duty-user {
+	font-weight: bold;
+}
+
+.duty-comment {
+    font-size: 80%;
+	color: #999
 }
