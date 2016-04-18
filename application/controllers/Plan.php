@@ -278,7 +278,7 @@ class Plan extends CI_Controller {
 		$data['vehicles']	= $vehicles;
 		$data['day_names']	= $this->calendar->get_day_names();
 		$data['time_list']	= $this->_time_list;
-		$data['users']		= $this->user_model->get_user_names();
+		$data['users']		= $this->user_model->get_user_names('members');
 		$data['time_format']= $this->_time_format;
 		$data['date_format']= $this->_date_format;
 		
@@ -462,7 +462,7 @@ class Plan extends CI_Controller {
 			'endtime'	=> $this->input->post('endtime') ? $this->input->post('endtime') : date('H', $duty['end']) .':00',
 		));
 		
-		$data['user_names']	= $this->user_model->get_user_names(); /* TODO: active */
+		$data['user_names']	= $this->user_model->get_user_names('members');
 		$data['vehicles']	= $this->plan_model->get_active_vehicles($now);
 		$data['time_list']	= $this->_time_list;
 		
