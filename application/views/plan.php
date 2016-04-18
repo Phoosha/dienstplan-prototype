@@ -10,7 +10,7 @@
 <div id="infoMessage"><?php echo $message; ?></div>
 
 <?php echo form_open("plan/confirm/{$year}/{$month}", 'class="pure-form"'); ?>
-<table class="pure-table pure-table-bordered">
+<table class="pure-table pure-table-bordered" id="plan">
 	<thead>
 		<th>Tag</th>
 		<th>Schicht</th>
@@ -54,7 +54,7 @@
 					echo "\n<tr class='{$type} {$today}'>\n";
 				}
 				
-				echo "<td>{$time}</td>\n";
+				echo "<td class=\"shift-name\"><p>{$time}</p></td>\n";
 				
 				$j = 0;
 				foreach ($vehicles as $vehicle) {

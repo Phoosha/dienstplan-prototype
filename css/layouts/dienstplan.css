@@ -1,3 +1,6 @@
+/*
+ * Set height to viewport to allow for footer positioning at the bottom
+ */
 html {
 	height: 100%;
 }
@@ -5,16 +8,6 @@ html {
 body {
 	height: 100%;
     color: #777;
-}
-
-a {
-    text-decoration: none;
-    color: rgb(61, 146, 201);
-}
-
-.pure-img-responsive {
-    max-width: 100%;
-    height: auto;
 }
 
 /*
@@ -31,7 +24,7 @@ Add transition to containers so they can push in and out.
 }
 
 /*
-This is the parent `<div>` that contains the menu and the content area.
+ * This is the parent `<div>` that contains the menu and the content area.
 */
 #layout {
 	height: 100%;
@@ -46,14 +39,14 @@ This is the parent `<div>` that contains the menu and the content area.
         left: 150px;
     }
 
+/*
+ * Wrapper for content and footer
+*/
 #main {
     position: relative;
-	min-height: 100%;
-/*
-	text-align: center;
-*/
+	float: left;  /* scale to content size */
+	min-height: 100%;  /* prevent floating left */
 	min-width: 100%;
-	float: left;
 }
 
 /*
@@ -67,10 +60,9 @@ The content `<div>` is where all your content goes.
     text-align: center;
 }
 
-table {
-	display: inline-table;
-}
-
+/*
+ * Footer which always stays at the bottom of the page and below all content
+ */
 .footer {
     font-size: 85%;
     border-top: 1px solid #ddd;
@@ -87,6 +79,7 @@ table {
 		margin: 0.7em 0;
 	}
 
+/*
 .header {
      margin: 0;
      color: #333;
@@ -105,61 +98,42 @@ table {
         padding: 0;
         margin-top: 0;
     }
+*/
+
+/*
+ * Ensure centering of tables like other inline content
+ */
+table {
+	display: inline-table;
+}
+
+th {
+	text-align: center;
+}
+
+a {
+    text-decoration: none;
+    color: rgb(61, 146, 201);
+}
+
+label {
+	text-align: left;
+}
+
+.pure-img-responsive {
+    max-width: 100%;
+    height: auto;
+}
 
 .content-subhead {
     text-transform: uppercase;
     color: #999;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #ddd;
     padding: 0.4em 0;
     font-size: 80%;
     font-weight: 500;
     letter-spacing: 0.1em;
 }
-
-.news-item {
-	padding-bottom: 1em;
-}
-
-.news-title {
-	font-size: 2em;
-	color: #c55;
-	margin-top: 0.5em;
-	margin-bottom: 0.2em;
-}
-
-	.news-title a {
-		color: #c55;
-		text-decoration: none;
-	}
-
-.news-meta {
-    color: #999;
-    font-size: 90%;
-    margin: 0;
-}
-
-.news-description {
-    color: #444;
-    line-height: 1.8em;
-}
-
-	.news-description p {
-		margin: 0.2em;
-	}
-
-#login {
-	text-align: center;
-	margin: 4em auto;
-}
-
-	#login label {
-		text-align: center;
-	}
-
-	#login * {
-		margin-left: auto;
-		margin-right: auto;
-	}
 
 #infoMessage {
 	margin-bottom: 0.5em;
@@ -172,11 +146,7 @@ table {
 	}
 
 
-
-/*
-The `#menu` `<div>` is the parent `<div>` that contains the `.pure-menu` that
-appears on the left side of the page.
-*/
+/* -- Menu -----------------------------------------------------------------*/
 
 #menu {
     margin-left: -150px; /* "#menu" width */
@@ -250,6 +220,7 @@ appears on the left side of the page.
         margin: 0;
         padding: 0.6em;
     }
+
 
 /* -- Dynamic Button For Responsive Menu -------------------------------------*/
 
@@ -352,10 +323,8 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     }
 }
 
-/*
- * -- HELPER STYLES --
- * Over-riding some of the .pure-button styles to make my buttons look unique
- */
+
+/* -- Button styles -----------------------------------------------------*/
 .primary-button,
 .secondary-button {
     -webkit-box-shadow: none;
@@ -372,7 +341,7 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     background: #fff;
     border: 1px solid #aaa;
     color: #666;
-    padding: 0.5em 2em;
+    padding: 0.5em 1em;
     font-size: 80%;
 }
 
@@ -380,20 +349,63 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 	color: #c55;
 }
 
-th {
+
+/* -- Welcome page-specific formatting -------------------------------------*/
+
+.news-item {
+	padding-bottom: 1em;
+}
+
+.news-title {
+	font-size: 2em;
+	color: #c55;
+	margin-top: 0.5em;
+	margin-bottom: 0.2em;
+}
+
+	.news-title a {
+		color: #c55;
+		text-decoration: none;
+	}
+
+.news-meta {
+    color: #999;
+    font-size: 90%;
+    margin: 0;
+}
+
+.news-description {
+    color: #555;
+    line-height: 1.8em;
+}
+
+	.news-description p {
+		margin: 0.2em;
+	}
+
+
+/* -- Login page-specific formatting -------------------------------------*/
+
+#login {
 	text-align: center;
+	margin: 4em auto;
 }
 
-#nav {
-	vertical-align: middle;
-}
+	#login label {
+		text-align: center;
+	}
 
-.duty-comment {
-	width: 100%;
-}
+	#login * {
+		margin-left: auto;
+		margin-right: auto;
+	}
 
-label {
-	text-align: left;
+
+/* -- Duty page-specific formatting -------------------------------------*/
+	
+#duty-form {
+	max-width: 30em;
+	margin: 0 auto;
 }
 
 .input-box {
@@ -403,10 +415,17 @@ label {
 	.input-box * {
 		width: 100%;
 	}
-	
-#duty-form {
-	max-width: 30em;
-	margin: 0 auto;
+
+
+/* -- Plan page-specific formatting -------------------------------------*/
+
+#nav {
+	vertical-align: middle;
+}
+
+#plan td,
+#plan th {
+	padding: 0.4em;
 }
 
 .weekend {
@@ -414,16 +433,21 @@ label {
 }
 
 .today {
-/*
-	border-left: 1px solid #c55;
-	border-right: 1px solid #c55;
-*/
 	background: #bee;
 }
 
 td.shift-slot {
 	background-color: #cfc;
+	width: 30%;
+	min-width: 8em;
+	height: 7em;
 }
+
+	.shift-slot p {
+		line-height: 1.2;
+		margin: 0;
+		padding: 0.4em 0;
+	}
 
 td.empty-slot {
 	background-color: #fcb;
@@ -437,18 +461,8 @@ td.selected {
 	background-color: #9df;
 }
 
-.shift-slot {
-	width: 10em;
-	height: 7em;
-}
-
-.shift-slot p {
-	line-height: 1.2;
-}
-
 .duty-time {
 	font-size: 105%;
-	color: #777
 }
 
 .duty-user {
@@ -456,6 +470,6 @@ td.selected {
 }
 
 .duty-comment {
-    font-size: 80%;
+	font-size: 80%;
 	color: #999
 }
