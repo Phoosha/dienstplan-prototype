@@ -193,7 +193,7 @@ class Plan extends CI_Controller {
 		
 		// This is for duplicate checking between vehicles and shifts
 		$slots = array();
-				
+		
 		foreach ($this->input->post(null) as $shift) {
 			
 			// Expected format for the slot is: {$day}-{$shift}-{$vehicle}
@@ -221,10 +221,8 @@ class Plan extends CI_Controller {
 			}
 			
 			// The slot might already be taken for another vehicle
-			if (isset($slots[$slot_id])) {
-				/* TODO: return gracefully with error */
-			} else if (isset($slots[$shift_id])) {
-				/* TODO: other error */
+			if (isset($slots[$slot_id]) || isset($slots[$shift_id])) {
+				continue;  // just ignore it since we just display a confirmation page
 			} else {
 				$slots[$slot_id] = true;
 				$slots[$shift_id] = true;
@@ -281,7 +279,7 @@ class Plan extends CI_Controller {
 		$data['users']		= $this->user_model->get_user_names('members');
 		$data['time_format']= $this->_time_format;
 		$data['date_format']= $this->_date_format;
-		
+
 		if (empty($duties)) {
 			redirect("plan/show/{$year}/{$month}", 'refresh');
 		} else {
@@ -424,7 +422,6 @@ class Plan extends CI_Controller {
 			$year			= $display_date['year'];
 			$month			= $display_date['month'];
 			
-			/* TODO: check result */
 			if ($result) {
 				redirect("plan/show/{$year}/{$month}", 'redirect');
 				return;

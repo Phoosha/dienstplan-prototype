@@ -51,14 +51,6 @@ $('#menuLink').on('click', function(e) {
 
 
 /****************************************************************
- * Checkbox select on within group by name
- ****************************************************************/
-$('input[type="checkbox"]').on('change', function() {
-    $('input[name="' + this.name + '"]').not(this).prop('checked', false);
-});
-
-
-/****************************************************************
  * Setup datepicker
  ****************************************************************/
 $(function() {
