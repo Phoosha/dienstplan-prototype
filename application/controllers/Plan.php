@@ -789,8 +789,4 @@ class Plan extends CI_Controller {
 		return count($offsets);
 	}
 	
-	public function test() {
-		var_dump($this->_determine_continuation(array(100, 100), 300, array( 100, 50, 155, 150, 10, 250 ), array( 160, 150, 250, 290, 300, 350 )));
-	}
-	
 }
