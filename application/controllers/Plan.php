@@ -393,6 +393,10 @@ class Plan extends CI_Controller {
 			if (isset($_POST['delete'])) {
 				$result = $this->plan_model->delete_dutytime($this->input->post('id'));
 				
+				if ($result) {
+					$this->session->set_flashdata('message', '<p>Dienst wurde erfolgreich gelöscht</p>');
+				}
+				
 			} else {
 				$start	= strtotime($this->input->post('startdate') .' '. $this->input->post('starttime'));
 				$end	= strtotime($this->input->post('enddate') .' '. $this->input->post('endtime'));
@@ -407,6 +411,10 @@ class Plan extends CI_Controller {
 						'user_id'	=> $this->input->post('user_id'),
 						'comment'	=> $this->input->post('comment'),
 					));;
+				
+					if ($result) {
+						$this->session->set_flashdata('message', '<p>Dienst wurde erfolgreich geändert</p>');
+					}
 				} else {
 					$result = $this->plan_model->insert_dutytime(array(
 						'start'		=> $start,
@@ -415,6 +423,10 @@ class Plan extends CI_Controller {
 						'user_id'	=> $this->input->post('user_id'),
 						'comment'	=> $this->input->post('comment'),
 					));
+					
+					if ($result) {
+						$this->session->set_flashdata('message', '<p>Dienst wurde erfolgreich eingefügt</p>');
+					}
 				}
 			}
 			

@@ -2,8 +2,7 @@
 
 class Admin extends CI_Controller {
 
-	public function index()
-	{		
+	public function index()	{		
 		if (! $this->ion_auth->logged_in()) {
 			$this->session->set_userdata('return_to', current_url());
 			redirect('auth/login', 'refresh');
@@ -21,4 +20,5 @@ class Admin extends CI_Controller {
 			$this->load->template('administration', $data);
 		}
 	}
+
 }
