@@ -98,11 +98,16 @@ class Auth extends CI_Controller {
 	}
 	
 	public function logout() {
-		// log the user out
-		$logout = $this->ion_auth->logout();
-
+		if (! $this->ion_auth->logged_in()) {
+			$this->session->set_flashdata('message', '<p>Du bist bereits abgemeldet</p>');
+			
+		} else {
+			// log the user out
+			$logout = $this->ion_auth->logout();
+			$this->session->set_flashdata('message', $this->ion_auth->messages());
+		}
+		
 		// redirect them to the login page
-		$this->session->set_flashdata('message', $this->ion_auth->messages());
 		redirect('auth/login', 'refresh');
 	}
 }

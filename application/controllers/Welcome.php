@@ -12,6 +12,7 @@ class Welcome extends CI_Controller {
 	public function index()
 	{		
 		if (! $this->ion_auth->logged_in()) {
+			$this->session->set_userdata('return_to', current_url());
 			redirect('auth/login', 'refresh');
 			
 		} else {
