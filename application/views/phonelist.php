@@ -11,16 +11,16 @@
 	</thead>
 	<tbody>
 		
-		<?php $odd = false;
-			foreach ($numbers as $item):
-				$odd = ! $odd ?>
+<?php $odd = false;
+foreach ($numbers as $item):
+	$odd = ! $odd ?>
 		
 		<tr <?php if ($odd) echo 'class="pure-table-odd"'; ?>>
 			<td><?php echo $item['name']; ?></td>
-			<td><?php echo $item['phone']; ?></td>
+			<td><a href="tel:<?php echo $item['phone']; ?>"><?php echo $item['phone']; ?></a></td>
 		</tr>
 		
-		<?php endforeach ?>
+<?php endforeach ?>
 		
 	</tbody>
 </table>
@@ -36,17 +36,17 @@
 	</thead>
 	<tbody>
 		
-		<?php $odd = false;
-			foreach ($users as $item):
-				$odd = ! $odd ?>
+<?php $odd = false;
+foreach ($users as $item):
+	$odd = ! $odd ?>
 		
 		<tr <?php if ($odd) echo 'class="pure-table-odd"'; ?>>
 			<td><?php echo $item['last_name']; ?></td>
 			<td><?php echo $item['first_name']; ?></td>
-			<td><?php echo $item['phone']; ?></td>
+			<td><a href="tel:<?php echo $item['phone']; ?>"><?php echo $item['phone']; ?></a></td>
 		</tr>
 		
-		<?php endforeach ?>
+<?php endforeach ?>
 		
 	</tbody>
 </table>
