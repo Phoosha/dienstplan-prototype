@@ -17,7 +17,7 @@ class Plan_model extends CI_Model {
 			=> 'Dieser Dienst existiert nicht mehr',
 	);
 	
-	protected $error_start_delimiter	= '<p>';
+	protected $error_start_delimiter	= '<p class="error">';
 	protected $error_end_delimiter		= '</p>';
 	
 	public function __construct()

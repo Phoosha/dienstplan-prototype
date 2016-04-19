@@ -141,8 +141,19 @@ label {
 
 	#infoMessage p {
 		margin: 0;
-		color: #f88;
 		font-style: bold;
+	}
+	
+	.error, .warning {
+		color: #d11;
+	}
+	
+	.info {
+		color: #17c;
+	}
+	
+	.success {
+		color: #5b5;
 	}
 
 

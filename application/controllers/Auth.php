@@ -5,6 +5,7 @@ class Auth extends CI_Controller {
 	function __construct() {
 		parent::__construct();
 		$this->load->library('form_validation');
+		$this->form_validation->set_error_delimiters('<p class="error">', '</p>');
 	}
 	
 	public function login() {
@@ -55,7 +56,7 @@ class Auth extends CI_Controller {
 			if ($this->ion_auth->is_time_locked_out($user)) {
 				// blocking this user with a message
 				
-				$this->session->set_flashdata('message', '<p>Zugang temporär gesperrt. Versuche es später nochmal.</p>');
+				$this->session->set_flashdata('message', '<p class="error">Zugang temporär gesperrt. Versuche es später nochmal.</p>');
 				redirect('auth/login', 'refresh');
 				
 			} else if ($this->ion_auth->login($user, $password, $remember)) {
@@ -64,7 +65,7 @@ class Auth extends CI_Controller {
 				// display a message if there were failed attempts
 				if ($attempts > 0) {
 					$last_login = date('j.n.Y G:i', $this->session->old_last_login);
-					$message = "<p>Seit Ihrer letzten Anmeldung am $last_login, gab es $attempts fehlgeschlagene(n) Anmeldeversuch(e).</p>";
+					$message = "<p class=\"warning\">Seit Ihrer letzten Anmeldung am $last_login, gab es $attempts fehlgeschlagene(n) Anmeldeversuch(e).</p>";
 					$this->session->set_flashdata('message', $message);
 				}
 				
@@ -87,7 +88,7 @@ class Auth extends CI_Controller {
 				// possibly create a message about the remaining attempts
 				$message = '';
 				if ($remaining_attempts <= $th_attempts) {
-					$message = '<p>Noch '. $remaining_attempts .' verbleibende Login-Versuche</p>';
+					$message = '<p class="info">Noch '. $remaining_attempts .' verbleibende Login-Versuche</p>';
 				}
 				
 				// redirect to the login page
@@ -99,7 +100,7 @@ class Auth extends CI_Controller {
 	
 	public function logout() {
 		if (! $this->ion_auth->logged_in()) {
-			$this->session->set_flashdata('message', '<p>Du bist bereits abgemeldet</p>');
+			$this->session->set_flashdata('message', '<p class="error">Du bist bereits abgemeldet</p>');
 			
 		} else {
 			// log the user out

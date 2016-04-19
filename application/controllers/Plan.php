@@ -63,6 +63,7 @@ class Plan extends CI_Controller {
 		$this->load->config('dienstplan', true);
 		$this->load->model('plan_model');
 		$this->load->model('user_model');
+		$this->load->helper('form');
 		
 		$cal_prefs = array(
 			'start_day'		=> $this->config->item('calendar_start_day', 'dienstplan'),
@@ -335,11 +336,11 @@ class Plan extends CI_Controller {
 		}
 		
 		if ($fail) {
-			$this->session->set_flashdata('message', $this->plan_model->errors() ? $this->plan_model->errors() : '<p>Ungültige Dienstzeiten</p>');
+			$this->session->set_flashdata('message', $this->plan_model->errors() ? $this->plan_model->errors() : '<p class="error">Ungültige Dienstzeiten</p>');
 		}
 		
 		if ($this->plan_model->insert_batch_dutytimes($insert_duties)) {
-			$this->session->set_flashdata('message', '<p>Dienst(e) wurde(n) erfolgreich eingetragen</p>');
+			$this->session->set_flashdata('message', '<p class="success">Dienst(e) wurde(n) erfolgreich eingetragen</p>');
 		} else {
 			$this->session->set_flashdata('message', $this->plan_model->errors());
 		}
@@ -361,6 +362,7 @@ class Plan extends CI_Controller {
 		$now = time();
 		
 		$this->load->library('form_validation');
+		$this->form_validation->set_error_delimiters('<p class="error">', '</p>');
 		
 		// For modify and delete the id is needed
 		if (isset($_POST['delete'])) {
@@ -394,7 +396,7 @@ class Plan extends CI_Controller {
 				$result = $this->plan_model->delete_dutytime($this->input->post('id'));
 				
 				if ($result) {
-					$this->session->set_flashdata('message', '<p>Dienst wurde erfolgreich gelöscht</p>');
+					$this->session->set_flashdata('message', '<p class="success">Dienst wurde erfolgreich gelöscht</p>');
 				}
 				
 			} else {
@@ -413,7 +415,7 @@ class Plan extends CI_Controller {
 					));;
 				
 					if ($result) {
-						$this->session->set_flashdata('message', '<p>Dienst wurde erfolgreich geändert</p>');
+						$this->session->set_flashdata('message', '<p class="success">Dienst wurde erfolgreich geändert</p>');
 					}
 				} else {
 					$result = $this->plan_model->insert_dutytime(array(
@@ -425,7 +427,7 @@ class Plan extends CI_Controller {
 					));
 					
 					if ($result) {
-						$this->session->set_flashdata('message', '<p>Dienst wurde erfolgreich eingefügt</p>');
+						$this->session->set_flashdata('message', '<p class="success">Dienst wurde erfolgreich eingefügt</p>');
 					}
 				}
 			}
