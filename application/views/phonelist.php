@@ -2,7 +2,7 @@
 
 
 <h2 class="content-subhead">Wichtige Telefonnummern</h2>
-<table class="pure-table">
+<table class="pure-table phonelist">
 	<thead>
 		<tr>
 				<th>Name</th>
@@ -26,7 +26,7 @@ foreach ($numbers as $item):
 </table>
 
 <h2 class="content-subhead">Alle Mitglieder</h2>
-<table class="pure-table">
+<table class="pure-table phonelist">
 	<thead>
 		<tr>
 				<th>Name</th>
