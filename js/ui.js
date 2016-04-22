@@ -78,7 +78,7 @@ $(function() {
  * Make shift slots selectable
  ****************************************************************/
  // Hide the checkbox with javascript
-$('input[class="shift-slot-select"]').attr("style", "display: none");
+//~ $('input[class="shift-slot-select"]').attr("style", "display: none");
 
 // Update checkbox and cell on click
 $('td.shift-slot').on('click', function() {
@@ -95,9 +95,20 @@ $('td.shift-slot').on('click', function() {
 	} else {
 		window.alert("Diese Schicht ist gesperrt!");
 	}
+}).on('mouseenter', function() {
+	$(this).addClass('hovered-slot');
+}).on('mouseleave', function() {
+	$(this).removeClass('hovered-slot');
 });
 
 // Do not change selection when clicking links
 $('td.shift-slot a').on('click', function(event) {
 	event.stopPropagation();
+});
+
+
+$('td.shift-slot a').on('mouseenter', function(event) {
+	$(this).parentsUntil('tr').addClass('dehover');
+}).on('mouseleave', function(event) {
+	$(this).parents().removeClass('dehover');
 });

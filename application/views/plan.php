@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<script type="text/javascript">$(function() { $('input[class="shift-slot-select"]').attr("style", "display: none"); })</script>
 
 <?php echo $this->calendar->generate($year, $month); ?>
 
@@ -74,7 +74,7 @@
 				}
 				
 				if ($add) {
-					echo "<td>".form_submit('verify', 'Eintragen', 'class="pure-button secondary-button"')."</td>\n";
+					echo '<td><button type="submit" name="verify" title="Eintragen" class="pure-button secondary-button fa fa-paper-plane-o" aria-type="hidden" /></td>'."\n";
 				} else if ($allow_add !== 'never') {
 					echo "<td></td>\n";
 				}

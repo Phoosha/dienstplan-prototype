@@ -16,13 +16,15 @@ if (isset($shifts[$slot_id])) {
 		}
 		echo "</span>\n";
 		
-		if (! $shift['duty']['locked']) {
-			echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">\n";
-		}
-		echo "<span class=\"duty-user\">{$shift['duty']['user']}</span><br/>\n";
-		if (! $shift['duty']['locked']) {
-			echo "</a>";
-		}
+		echo '<span class="duty-user">';
+			if (! $shift['duty']['locked']) {
+				echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">\n";
+			}
+			echo $shift['duty']['user'];
+			if (! $shift['duty']['locked']) {
+				echo '<i class="fa fa-pencil icon-link" aria-hidden="true"></i></a>';
+			}
+		echo "</span><br/>\n";;
 
 		echo "<span class=\"duty-comment\">{$shift['duty']['comment']}</span>\n";
 		

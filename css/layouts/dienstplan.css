@@ -113,7 +113,16 @@ th {
 
 a {
     text-decoration: none;
-    color: rgb(61, 146, 201);
+    color: #1f8dd6;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #116298;
+}
+
+.fa {
+	padding: 0 0.3em;
 }
 
 label {
@@ -158,6 +167,16 @@ label {
 
 
 /* -- Menu -----------------------------------------------------------------*/
+
+#logo {
+	width: 128px;
+	height: 160px;
+	background-image: url(../../images/Wappen-transparent.png);
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	margin: auto;
+}
 
 #menu {
     margin-left: -150px; /* "#menu" width */
@@ -206,6 +225,7 @@ label {
         */
         #menu .pure-menu li a:hover,
         #menu .pure-menu li a:focus {
+			text-decoration: none;
             background: #333;
         }
 
@@ -356,8 +376,10 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     font-size: 80%;
 }
 
-.confirm-button {
-	color: #c55;
+.danger-button {
+	border-color: #a44;
+	background-color: #d55;
+	color: #fff;
 }
 
 
@@ -470,6 +492,21 @@ td.alone-slot {
 
 td.selected {
 	background-color: #9df;
+}
+
+td.hovered-slot {
+	-moz-box-shadow: inset 0 0 7px 3px #6ac;
+	-webkit-box-shadow: inset 0 0 7px 3px #6ac;
+	box-shadow: inset 0 0 7px 3px #6ac;
+/*
+	outline: 2px solid #7bd;
+*/
+}
+
+td.dehover:hover {
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
 }
 
 .duty-time {

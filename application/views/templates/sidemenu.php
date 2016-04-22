@@ -8,7 +8,7 @@
 <div id="menu">
 	<div class="pure-menu">
 		<a class="pure-menu-heading" href="https://github.com/Phoosha/dienstplan">
-			<img class="pure-img" id="logo" src="images/Wappen-transparent.png" />
+			<div id="logo"></div>
 		</a>
 
 <?php // Only display menu content if explicitly requested
