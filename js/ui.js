@@ -58,6 +58,14 @@ $(function() {
 	$("#startdate-picker").datepicker({
 		onClose: function(dateText, inst) { 
 			$(this).attr("disabled", false);
+
+			var endPicker		= $("#enddate-picker");
+			var newStartDate	= $(this).datepicker("getDate");
+			var endDate			= $(endPicker).datepicker("getDate");
+
+			if (newStartDate > endDate) {
+				$(endPicker).datepicker("setDate", newStartDate);
+			}
 		},
 		beforeShow: function(input, inst) {
 			$(this).attr("disabled", true);
@@ -69,6 +77,7 @@ $(function() {
 		},
 		beforeShow: function(input, inst) {
 			$(this).attr("disabled", true);
+			$(this).datepicker("option", "minDate", $("#startdate-picker").datepicker("getDate"));
 		}
 	});
 });
