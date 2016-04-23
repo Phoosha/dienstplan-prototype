@@ -116,17 +116,31 @@ a {
     color: #1f8dd6;
 }
 
+.linked-icon {
+	color: #555;
+}
+
+.padded-icon {
+	padding: 0.2em;
+}
+
 a:hover {
 	text-decoration: underline;
 	color: #116298;
 }
 
-.fa {
-	padding: 0 0.3em;
-}
+	a:hover .linked-icon {
+		color: #116298;
+	}
 
 label {
 	text-align: left;
+}
+
+
+.tight-table td,
+.tight-table th {
+	padding: 0.4em;
 }
 
 .pure-img-responsive {
@@ -454,11 +468,6 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 
 #nav {
 	vertical-align: middle;
-}
-
-#plan td,
-#plan th {
-	padding: 0.4em;
 }
 
 .weekend {

@@ -10,7 +10,7 @@
 <div id="infoMessage"><?php echo $message; ?></div>
 
 <?php echo form_open("plan/confirm/{$year}/{$month}", 'class="pure-form"'); ?>
-<table class="pure-table pure-table-bordered" id="plan">
+<table class="pure-table pure-table-bordered tight-table" id="plan">
 	<thead>
 		<th>Tag</th>
 		<th>Schicht</th>
