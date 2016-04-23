@@ -518,11 +518,9 @@ class Plan extends CI_Controller {
 		// Get the number of days in the given month
 		$total_days		= $this->calendar->get_total_days($month, $year);
 		
-		// Increment month by one because the last shift could end in the next month
-		list($end_year, $end_month) = $this->_increment_month($year, $month);
 		// Month start/end as defined by the shifts
 		$month_start	= $this->_get_first_shift_start($year, $month);
-		$month_end		= $this->_get_first_shift_start($end_year, $end_month);
+		$month_end		= $this->_get_last_shift_end($year, $month);
 		
 		// Fetch the unprepared duty times from the model
 		$dutytimes		= $this->plan_model->get_dutytimes($month_start, $month_end)->result_array();
@@ -706,11 +704,27 @@ class Plan extends CI_Controller {
 	}
 	
 	/*
-	 * Returns the start time of the first shift.
+	 * Returns the start time of the first shift of the given day or if
+	 * day is unset of the month's first day.
 	 */
 	function _get_first_shift_start($year, $month, $day = '01') {
 		$shift_times	= $this->config->item('shift_start_times', 'dienstplan');
 		return strtotime("{$day}-{$month}-{$year} {$shift_times[0]}");
+	}
+	
+	/*
+	 * Returns the end time of the last shift of the given day or if day
+	 * is unset of the month's last day.
+	 */
+	function _get_last_shift_end($year, $month, $day = null) {
+		if (! $day) {
+			$day = $this->calendar->get_total_days($month, $year);
+		}
+		
+		// last shift's end is next day's first shift's start
+		list($year, $month, $day) = $this->_increment_day($year, $month, $day);
+		
+		return $this->_get_first_shift_start($year, $month, $day);
 	}
 	
 	/*
