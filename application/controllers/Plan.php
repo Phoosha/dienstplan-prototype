@@ -123,7 +123,7 @@ class Plan extends CI_Controller {
 		$data['month']		= $month;
 		$data['days']		= $this->plan_model->get_days($year, $month);
 		$data['day_names']	= $this->calendar->get_day_names();
-		$data['vehicles']	= $this->plan_model->get_active_vehicles($now);
+		$data['vehicles']	= $this->plan_model->get_active_vehicles($this->_get_last_shift_end($year, $month));
 		$data['shifts']		= $shifts;
 		$data['continuity']	= $continuity;
 		$data['disp_times'] = $this->config->item('shift_display_times', 'dienstplan');

@@ -66,9 +66,9 @@ class Plan_model extends CI_Model {
 	public function get_active_vehicles($time) {
 		// fetch the newes entry which is already active
 		$this->db->select('vehicle_0, vehicle_1');
-		$this->db->where('active_on <=', $time);
+		$this->db->where('active_on <', $time);
 		$this->db->limit(1);
-		$this->db->order_by('active_on DESC, id DESC');
+		$this->db->order_by('active_on DESC');
 		$vehicles = $this->db->get('vehicles')->row_array();
 		
 		// set some default values for no or incomplete results
