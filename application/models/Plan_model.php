@@ -238,7 +238,7 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
-		if (! $this->is_allowed_to_edit($duty)) {
+		if (! $this->is_allowed_to_edit($id)) {
 			$this->set_error('no_permission_to_edit');
 			return false;
 		}
