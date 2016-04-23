@@ -779,24 +779,43 @@ class Plan extends CI_Controller {
 		return $cur_shift;
 	}
 	
-	function _determine_continuation($offsets, $endtime, $starts, $ends) {
+	/*
+	 * Checks whether there are whole numberedly continous unions of
+	 * the invervals given by $starts and $ends associatively. Each such
+	 * union is constructed for exactly one offset from $offsets and
+	 * must contain both the offset and the target value.
+	 *
+	 * Returns: Number n of such unions (i.e. 0 <= n <= count($offsets)
+	 *
+	 */
+	function _determine_continuation($offsets, $target_value, $starts, $ends) {
+
+		// Work linearly from the smallest value to the biggest
 		array_multisort($starts, SORT_NUMERIC, $ends);
 		sort($offsets, SORT_NUMERIC);
 		
-		while ($offsets[0] < $endtime && ! empty($starts)) {
+		/*
+		 * Update the values we could reach in $offsets as long as we
+		 * could reach any and as long as we have still values in $starts
+		 *  resp. $ends to update it with. Additionally we stop once we
+		 * all offsets have reached the target value.
+		 */
+		while (! empty($offsets) && ! empty($starts) && $offsets[0] < $target_value) {
 			$start	= array_shift($starts);
 			$end	= array_shift($ends);
 			
-			if ($start <= $offsets[0]) {
-				$offsets[0] = $end;
-			} else if (! array_shift($starts) || ! array_shift($ends)) {
-				break;
+			while ($smallest_offset = array_shift($offsets)) {
+				if ($start <= $smallest_offset) {
+					$offsets[] = $end;
+					break;
+				}
 			}
 			
 			sort($offsets, SORT_NUMERIC);
 		}
 		
-		while (! empty($offsets) && $offsets[0] < $endtime) {
+		// Now remove all offsets which did not reach the target value
+		while (! empty($offsets) && $offsets[0] < $target_value) {
 			array_shift($offsets);
 		}
 		
