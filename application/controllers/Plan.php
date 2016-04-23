@@ -360,7 +360,8 @@ class Plan extends CI_Controller {
 		$data['menu']		= true;
 		$data['menu_id']	= 'plan';
 		
-		$now = time();
+		$now		= time();
+		$message	= null;
 		
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('<p class="error">', '</p>');
@@ -441,13 +442,13 @@ class Plan extends CI_Controller {
 				redirect("plan/show/{$year}/{$month}", 'redirect');
 				return;
 			} else {
-				$this->session->set_flashdata('message', $this->plan_model->errors());
+				$message = $this->plan_model->errors();
 			}
 		}
 			
 		// try to get a message about what went wrong if anything
 		$data['message'] = validation_errors() ? 
-			validation_errors() : $this->session->flashdata('message');
+			validation_errors() : $message;
 		
 		$duty_id	= (int) $duty_id;
 		$duty		= $this->plan_model->get_duty($duty_id);
