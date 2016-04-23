@@ -274,6 +274,8 @@ class Plan extends CI_Controller {
 		}
 		asort($duties);
 		
+		$data['year']		= $year;
+		$data['month']		= $month;
 		$data['duties']		= $duties;
 		$data['vehicles']	= $vehicles;
 		$data['day_names']	= $this->calendar->get_day_names();

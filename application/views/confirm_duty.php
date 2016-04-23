@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 
-<?php echo form_open('plan/save', 'class="pure-form"'); ?>
+<?php echo form_open("plan/save/{$year}/{$month}", 'class="pure-form"'); ?>
 <legend class="content-subhead">Dienste so übernehmen?</legend>
 <div>
 <table class="pure-table">
