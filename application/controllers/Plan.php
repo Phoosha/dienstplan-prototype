@@ -56,6 +56,7 @@ class Plan extends CI_Controller {
 		'22:30' => '22:30',
 		'23:00' => '23:00',
 		'23:30' => '23:30',
+		'24:00' => '24:00',
 	);
 	
 	function __construct() {
