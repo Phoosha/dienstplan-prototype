@@ -769,6 +769,20 @@ class Plan extends CI_Controller {
 		}
 		
 		// Ensure the date is a valid value
+		return $this->_adjust_date_for_unix($year, $month);
+	}
+
+	/*
+	 * Returns valid values for year and month, which are in between
+	 * the year 1970 and 2105 for an unsigned 32 bit unix timestamp.
+	 */
+	function _adjust_date_for_unix($year, $month) {
+		if ($year < 0) {
+			$year = 2105 + ($year % 136);
+		} else if ($year < 1970 || $year > 2105) {
+			$year = 1970 + ($year % 136);
+		}
+
 		return $this->calendar->adjust_date($month, $year);
 	}
 	
