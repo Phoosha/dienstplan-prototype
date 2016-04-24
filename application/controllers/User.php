@@ -36,7 +36,7 @@ class User extends CI_Controller {
 
 		} else {
 			// Set some common view settings
-			$data['title']		= 'Einstellungen';
+			$data['title']		= 'Mein Konto';
 			$data['menu']		= true;
 			$data['menu_id']	= 'settings';
 		

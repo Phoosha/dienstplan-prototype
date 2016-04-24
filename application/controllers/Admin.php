@@ -13,7 +13,7 @@ class Admin extends CI_Controller {
 			
 		} else {
 			// Set some common view settings
-			$data['title']		= 'Administration';
+			$data['title']		= 'Verwaltung';
 			$data['menu']		= true;
 			$data['menu_id']	= 'admin';
 		
