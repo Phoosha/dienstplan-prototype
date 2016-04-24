@@ -1,8 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 
-<script type="text/javascript">$(function() { $('input[class="shift-slot-select"]').attr("style", "display: none"); })</script>
-
 <?php echo $this->calendar->generate($year, $month); ?>
 
 <br />
