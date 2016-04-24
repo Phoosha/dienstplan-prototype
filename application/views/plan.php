@@ -72,7 +72,7 @@
 				}
 				
 				if ($add) {
-					echo '<td><button type="submit" name="verify" title="Eintragen" class="pure-button secondary-button fa fa-paper-plane-o" aria-type="hidden" /></td>'."\n";
+					echo '<td><button type="submit" name="verify" title="Eintragen" class="pure-button secondary-button icon-button fa fa-paper-plane-o" aria-type="hidden" /></td>'."\n";
 				} else if ($allow_add !== 'never') {
 					echo "<td></td>\n";
 				}

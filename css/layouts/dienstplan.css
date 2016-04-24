@@ -115,21 +115,13 @@ label {
 	text-align: left;
 }
 
-.float-wrapper {
-	display: inline-block;
-}
-
-.left-float {
-	float: left;
-}
-
-.right-float {
-	float: right;
-}
-
 .tight-table td,
 .tight-table th {
 	padding: 0.4em;
+}
+
+.nowrap {
+	white-space: nowrap;
 }
 
 .pure-img-responsive {
@@ -151,17 +143,9 @@ label {
 	color: #555;
 }
 
-.padded-icon {
-	padding: 0.2em;
-}
-
 a {
     text-decoration: none;
     color: #1f8dd6;
-}
-
-.linked-icon {
-	color: #444;
 }
 
 a:hover {
@@ -399,13 +383,11 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 .primary-button {
     color: #fff;
     background: #1b98f8;
-    margin: 0.5em 0;
 }
 .secondary-button {
     background: #fff;
     border: 1px solid #aaa;
     color: #666;
-    padding: 0.5em 1em;
     font-size: 95%
 }
 
@@ -413,6 +395,11 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 	border-color: #a44;
 	background-color: #d55;
 	color: #fff;
+}
+
+.icon-button {
+	padding: 0.5em;
+	margin: 0 0.2em;
 }
 
 
@@ -557,4 +544,24 @@ td.dehover:hover {
 .phonelist td,
 .phonelist th {
 	text-align: left;
+}
+
+
+/* -- Confirm duty page-specific formatting -----------------------------------*/
+
+#confirm-duty input {
+	margin-left: 0.5em;
+}
+
+.center {
+	text-align: center;
+}
+
+.wrapper {
+	display: inline-block;
+}
+
+.bottom-wrapper {
+	display: inline-block;
+	vertical-align: bottom;
 }

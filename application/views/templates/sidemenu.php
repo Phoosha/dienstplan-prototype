@@ -34,7 +34,7 @@
 <?php endif ?>
 		</ul>
 	</div>
-	<a href="<?php echo site_url('auth/logout')?>"><button class="primary-button pure-button"><i class="fa fa-sign-out" aria-hidden="true"></i> Abmelden</button></a>
+	<a href="<?php echo site_url('auth/logout')?>"><button class="primary-button pure-button danger-button"><i class="fa fa-sign-out" aria-hidden="true"></i> Abmelden</button></a>
 	
 <?php } else { ?>
 	

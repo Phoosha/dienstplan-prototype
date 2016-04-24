@@ -22,7 +22,7 @@ if (isset($shifts[$slot_id])) {
 			}
 			echo $shift['duty']['user'];
 			if (! $shift['duty']['locked']) {
-				echo '<i class="fa fa-pencil-square-o fa-lg linked-icon padded-icon" aria-hidden="true"></i></a>';
+				echo '</a>';
 			}
 		echo "</span><br/>\n";;
 

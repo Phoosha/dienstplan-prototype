@@ -61,7 +61,7 @@
 		</div>
 	</div></fieldset>
 	
-	<?php echo form_submit($action, $button, 'class="pure-button secondary-button"'); ?>
+	<?php echo form_submit($action, $button, 'class="pure-button primary-button"'); ?>
 	<?php if ($edit) echo form_submit('delete', 'Dienst löschen', 'class="pure-button secondary-button danger-button" onclick="return confirm(\'Dienst wirklich löschen?\')"'); ?>
 	
 </form>
