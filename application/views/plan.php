@@ -35,12 +35,12 @@
 			$shift_count = count($disp_times);
 			
 			$today = "";
-			if ($day === $cur_day) {
+			if ($day == $cur_day) {
 				$today ="today";
 			}
 			
 			echo "\n<tr class='{$type} {$today}'>\n";
-			echo "<td rowspan={$shift_count} id='day-{$day}'>$wday_s,<br />$day_s.$month.$year</td>\n";
+			echo "<td rowspan={$shift_count} id='day-{$day}'>{$wday_s},<br />$day_s.$month.$year</td>\n";
 			
 			$i = 0;
 			foreach ($disp_times as $time) {

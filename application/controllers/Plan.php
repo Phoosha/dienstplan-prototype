@@ -112,7 +112,7 @@ class Plan extends CI_Controller {
 		$allow_add	= $cur_shift === '0-0' ? '1-0' : $cur_shift;
 		if ($this->ion_auth->is_admin()) {
 			$allow_add = '1-0'; // always
-		} else if ((int) $year < (int) $cur_year || (int) $month < (int) $cur_month) {
+		} else if ($year < $cur_year || $month < $cur_month) {
 			$allow_add = 'never';
 		}
 		
@@ -128,7 +128,7 @@ class Plan extends CI_Controller {
 		$data['continuity']	= $continuity;
 		$data['disp_times'] = $this->config->item('shift_display_times', 'dienstplan');
 		$data['allow_add']	= $allow_add;
-		$data['cur_day']	= (int) explode('-', $cur_shift)[0];
+		$data['cur_day']	= explode('-', $cur_shift)[0];
 		
 		// Setup a calendar object for rendering the navigation
 		// This should come last so it doesn't overwrite the calendar
@@ -452,7 +452,7 @@ class Plan extends CI_Controller {
 		$data['message'] = validation_errors() ? 
 			validation_errors() : $message;
 		
-		$duty_id	= (int) $duty_id;
+		$duty_id	= round($duty_id);
 		$duty		= $this->plan_model->get_duty($duty_id);
 		
 		if (! isset($duty)) {
@@ -512,9 +512,6 @@ class Plan extends CI_Controller {
 	 * by the view.
 	 */
 	function _prepare_view_shifts($year, $month) {
-		// To do some calculations we need ints
-		$year			= (int) $year;
-		$month			= (int) $month;
 		
 		$shift_times_count	= count($this->config->item('shift_start_times', 'dienstplan'));
 		
@@ -543,12 +540,12 @@ class Plan extends CI_Controller {
 			// Set some start and end times
 			$duty_start			= $duty['start'];
 			$duty_end			= $duty['end'];
-			$duty_start_year	= (int) date('Y', $duty_start);
-			$duty_end_year		= (int) date('Y', $duty_end);
-			$duty_start_month	= (int) date('n', $duty_start);
-			$duty_end_month		= (int) date('n', $duty_end);
-			$duty_start_day		= (int) date('j', $duty_start);
-			$duty_end_day		= (int) date('j', $duty_end);
+			$duty_start_year	= date('Y', $duty_start);
+			$duty_end_year		= date('Y', $duty_end);
+			$duty_start_month	= date('n', $duty_start);
+			$duty_end_month		= date('n', $duty_end);
+			$duty_start_day		= date('j', $duty_start);
+			$duty_end_day		= date('j', $duty_end);
 			
 			// Handle start/end day for duties across months or years (unlikely)
 			if ($duty_start_month !== $month || $duty_start_year !== $year) {
@@ -611,12 +608,12 @@ class Plan extends CI_Controller {
 	
 	function _get_shift_end($year, $month, $shift_id) {
 		$v		= explode('-', $shift_id, 2);
-		$day	= (int) $v[0];
-		$shift	= ((int) $v[1]) + 1;
+		$day	= $v[0];
+		$shift	= $v[1] + 1;
 		
 		$shift_times = $this->config->item('shift_start_times', 'dienstplan');
 		
-		if ($shift === count($shift_times)) {
+		if ($shift == count($shift_times)) {
 			$shift = 0;
 			list($year, $month, $day) = $this->_increment_day($year, $month, $day);
 		}
@@ -625,7 +622,6 @@ class Plan extends CI_Controller {
 	}
 	
 	function _increment_day($year, $month, $day) {
-		$day = (int) $day;
 		$day++;
 		
 		if ($day >= $this->calendar->get_total_days($month, $year)) {
@@ -637,10 +633,9 @@ class Plan extends CI_Controller {
 	}
 	
 	function _increment_month($year, $month) {
-		$day = (int) $month;
 		$month++;
 		
-		if ($month === 13) {
+		if ($month > 12) {
 			$month = 1;
 			$year++;
 		}
@@ -678,7 +673,7 @@ class Plan extends CI_Controller {
 				
 				$duty_start_hour	= date('G', $duty_start);
 				$duty_start_minute	= date('i', $duty_start);
-				$real_start = ((int) $duty_start_minute) === 0
+				$real_start = $duty_start_minute == 0
 						? $duty_start_hour
 						: $duty_start_hour .':'. $duty_start_minute;
 			}
@@ -690,7 +685,7 @@ class Plan extends CI_Controller {
 				
 				$duty_end_hour		= date('G', $duty_end);
 				$duty_end_minute	= date('i', $duty_end);
-				$real_end = ((int) $duty_end_minute) === 0
+				$real_end = $duty_end_minute == 0
 						? $duty_end_hour
 						: $duty_end_hour .':'. $duty_end_minute;
 			}
@@ -731,11 +726,12 @@ class Plan extends CI_Controller {
 	}
 	
 	/*
-	 * Returns the year and month for $time.
+	 * Returns the year and month and day for $time based on the
+	 * associated shift.
 	 */
 	function _get_year_month_day($time) {
 		$year			= date('Y', $time);
-		$month			= (int) date('n', $time);
+		$month			= date('n', $time);
 		$day			= date('j', $time);
 		$first_shift	= $this->_get_first_shift_start($year, $month);
 		

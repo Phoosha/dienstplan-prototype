@@ -303,12 +303,12 @@ class Plan_model extends CI_Model {
 		}
 		
 		if ($check_id) {
-			$duty['id']		= (int) $duty['id'];
+			$duty['id']		= round($duty['id']);
 		}
-		$duty['start']		= (int) $duty['start'];
-		$duty['end']		= (int) $duty['end'];
+		$duty['start']		= round($duty['start']);
+		$duty['end']		= round($duty['end']);
 		$duty['vehicle']	= (int) $duty['vehicle'];
-		$duty['user_id']	= (int) $duty['user_id'];
+		$duty['user_id']	= round($duty['user_id']);
 		
 		$this->load->model('user_model');
 		if (! $this->user_model->is_valid_user_id($duty['user_id'])) {
