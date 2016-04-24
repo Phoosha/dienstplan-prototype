@@ -570,7 +570,7 @@ class Plan extends CI_Controller {
 					$shift_start	= $this->_get_shift_start($year, $month, $shift_id);
 					$shift_end		= $this->_get_shift_end($year, $month, $shift_id);
 					
-					$shift			= $this->_prepare_shift($duty, $shift_start, $shift_end, "{$day}-{$i}");
+					$shift			= $this->_prepare_shift($duty, $shift_start, $shift_end, $shift_id);
 					
 					if (isset($shift)) {
 						$slot_id				= "{$day}-{$i}-{$duty['vehicle']}";
@@ -624,7 +624,7 @@ class Plan extends CI_Controller {
 	function _increment_day($year, $month, $day) {
 		$day++;
 		
-		if ($day >= $this->calendar->get_total_days($month, $year)) {
+		if ($day > $this->calendar->get_total_days($month, $year)) {
 			$day = 1;
 			list($year, $month) = $this->_increment_month($year, $month);
 		}
