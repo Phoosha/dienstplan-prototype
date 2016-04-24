@@ -90,7 +90,7 @@ $(function() {
 //~ $('input[class="shift-slot-select"]').attr("style", "display: none");
 
 // Update checkbox and cell on click
-$('td.shift-slot').on('click', function() {
+$('td.selectable').on('click', function() {
 	var checkbox = $(this).find('input[type="checkbox"]');
 	var selected = !checkbox.prop('checked');
 	
@@ -111,12 +111,12 @@ $('td.shift-slot').on('click', function() {
 });
 
 // Do not change selection when clicking links
-$('td.shift-slot a').on('click', function(event) {
+$('td.selectable a').on('click', function(event) {
 	event.stopPropagation();
 });
 
 
-$('td.shift-slot a').on('mouseenter', function(event) {
+$('td.selectable a').on('mouseenter', function(event) {
 	$(this).parentsUntil('tr').addClass('dehover');
 }).on('mouseleave', function(event) {
 	$(this).parents().removeClass('dehover');
