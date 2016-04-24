@@ -137,7 +137,7 @@ class Plan extends CI_Controller {
 		$index_page .= ! empty($index_page) ? '/' : '';
 		$template = array(
 			'table_open' 			=> '<table class="pure-table">',
-			'heading_title_cell'	=> '<th colspan="{colspan}"><a href="'. site_url('plan/show') .'"><i class="fa fa-home"></i><br/>{heading}</a></th>',
+			'heading_title_cell'	=> '<th colspan="{colspan}"><a href="'. site_url('plan/show') .'"><i class="fa fa-home fa-lg linked-icon"></i><br/>{heading}</a></th>',
 			'heading_row_start'		=> '<thead id="nav">',
 			'heading_row_end'		=> '</thead>',
 			'cal_cell_no_content'		=> '<a href="'. current_url() .'#day-{day}">{day}</a>',
