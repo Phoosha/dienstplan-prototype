@@ -111,32 +111,21 @@ th {
 	text-align: center;
 }
 
-a {
-    text-decoration: none;
-    color: #1f8dd6;
-}
-
-.linked-icon {
-	color: #555;
-}
-
-.padded-icon {
-	padding: 0.2em;
-}
-
-a:hover {
-	text-decoration: underline;
-	color: #116298;
-}
-
-	a:hover .linked-icon {
-		color: #116298;
-	}
-
 label {
 	text-align: left;
 }
 
+.float-wrapper {
+	display: inline-block;
+}
+
+.left-float {
+	float: left;
+}
+
+.right-float {
+	float: right;
+}
 
 .tight-table td,
 .tight-table th {
@@ -150,13 +139,42 @@ label {
 
 .content-subhead {
     text-transform: uppercase;
-    color: #999;
+    color: #555;
     border-bottom: 1px solid #ddd;
     padding: 0.4em 0;
     font-size: 80%;
     font-weight: 500;
     letter-spacing: 0.1em;
 }
+
+.pure-form legend {
+	color: #555;
+}
+
+.padded-icon {
+	padding: 0.2em;
+}
+
+a {
+    text-decoration: none;
+    color: #1f8dd6;
+}
+
+.linked-icon {
+	color: #444;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #116298;
+}
+
+	a:hover .linked-icon {
+		color: #116298;
+	}
+
+
+/* -- Message styles ------------------------------------------------------*/
 
 #infoMessage {
 	margin-bottom: 0.5em;
@@ -370,12 +388,13 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 
 
 /* -- Button styles -----------------------------------------------------*/
+
 .primary-button,
 .secondary-button {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
-    border-radius: 20px;
+    border-radius: 11px;
 }
 .primary-button {
     color: #fff;
@@ -387,7 +406,7 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     border: 1px solid #aaa;
     color: #666;
     padding: 0.5em 1em;
-    font-size: 80%;
+    font-size: 95%
 }
 
 .danger-button {
@@ -450,7 +469,7 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 
 /* -- Duty page-specific formatting -------------------------------------*/
 	
-#duty-form {
+#duty-form fieldset {
 	max-width: 30em;
 	margin: 0 auto;
 }

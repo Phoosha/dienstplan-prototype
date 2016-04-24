@@ -14,7 +14,7 @@
 
 <?php echo form_open(current_url(), 'class="pure-form pure-form-stacked" id="duty-form"'); ?>
 
-	<legend><?php echo $legend; ?></legend>
+	<legend class="content-subhead"><?php echo $legend; ?></legend>
 	
 	<div id="infoMessage"><?php echo $message; ?></div>
 	
