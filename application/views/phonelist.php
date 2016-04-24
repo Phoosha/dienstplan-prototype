@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 
-<h2 class="content-subhead">Wichtige Telefonnummern<?php if ($this->ion_auth->is_admin()): ?>&nbsp;<a href="#"><i title="Hinzufügen" class="fa fa-plus linked-icon fa-lg" aria-hidden="true"></i></a><?php endif ?>
+<h2 class="content-subhead">Wichtige Telefonnummern<?php if ($this->ion_auth->is_admin()): ?>&nbsp;<a href="<?php echo current_url() ?>#"><i title="Hinzufügen" class="fa fa-plus linked-icon fa-lg" aria-hidden="true"></i></a><?php endif ?>
 </h2>
 <table class="pure-table phonelist tight-table">
 	<thead>
@@ -24,7 +24,7 @@ foreach ($numbers as $item):
 			<td><a href="tel:<?php echo $item['phone']; ?>"><?php echo $item['phone']; ?></a></td>
 <?php if ($this->ion_auth->is_admin()): ?>
 			<td>
-				<a href="#"><i title="Bearbeiten" class="fa fa-pencil-square-o linked-icon fa-lg" aria-hidden="true"></i></a>&nbsp;<a href="#"><i title="Löschen" class="fa fa-trash-o linked-icon fa-lg" aria-hidden="true"></i></a>
+				<a href="<?php echo current_url() ?>#"><i title="Bearbeiten" class="fa fa-pencil-square-o linked-icon fa-lg" aria-hidden="true"></i></a>&nbsp;<a href="<?php echo current_url() ?>#"><i title="Löschen" class="fa fa-trash-o linked-icon fa-lg" aria-hidden="true"></i></a>
 			</td>
 <?php endif ?>
 		</tr>

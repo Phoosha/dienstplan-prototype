@@ -1,5 +1,5 @@
 <!-- Menu toggle -->
-<a href="#menu" id="menuLink" class="menu-link">
+<a href="<?php echo current_url() ?>#menu" id="menuLink" class="menu-link">
 	<!-- Hamburger icon -->
 	<span></span>
 </a>
