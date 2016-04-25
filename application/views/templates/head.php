@@ -6,7 +6,15 @@
 	<title><?php echo $title; ?> - FRS Irgendwo</title>
 	<base href="<?php echo site_url(); ?>">
 	<link rel="shortcut icon" href='favicon.ico'>
-
+	
+	<link rel="stylesheet" href="https://yui-s.yahooapis.com/pure/0.6.0/pure-min.css">
+	<!--[if lte IE 8]>
+		<link rel="stylesheet" href="css/layouts/dienstplan-old-ie.css">
+	<![endif]-->
+	<!--[if gt IE 8]><!-->
+		<link rel="stylesheet" href="css/layouts/dienstplan.css">
+	<!--<![endif]-->
+	
 	<script type="text/javascript">
 		function addOnloadHandler(element, handler) {
 			if (element.addEventListener)
@@ -42,12 +50,4 @@
 			document.body.appendChild(element);
 		}
 	</script>
-	
-	<link rel="stylesheet" href="https://yui-s.yahooapis.com/pure/0.6.0/pure-min.css">
-	<!--[if lte IE 8]>
-		<link rel="stylesheet" href="css/layouts/dienstplan-old-ie.css">
-	<![endif]-->
-	<!--[if gt IE 8]><!-->
-		<link rel="stylesheet" onload="downloadJQuery()" href="css/layouts/dienstplan.css">
-	<!--<![endif]-->
 </head>

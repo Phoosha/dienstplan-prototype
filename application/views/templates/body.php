@@ -1,4 +1,4 @@
-<body>
+<body onload="downloadJQuery()">
 	
 <div id="layout">
 	<?php $this->load->view('templates/sidemenu'); ?>
@@ -20,7 +20,6 @@
 	<link rel="stylesheet" href="https://yui-s.yahooapis.com/pure/0.6.0/grids-responsive-min.css">
 <!--<![endif]-->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-<script src=></script>
 
 </body>
 </html>
