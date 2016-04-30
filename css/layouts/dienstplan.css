@@ -152,9 +152,10 @@ a:hover {
 	color: #116298;
 }
 
-	a:hover .linked-icon {
-		color: #116298;
-	}
+.inline-icon {
+	padding: 0 0.5em;
+	display: inline;
+}
 
 
 /* -- Message styles ------------------------------------------------------*/
@@ -536,6 +537,10 @@ td.dehover:hover {
 	font-size: 80%;
 	color: #999;
 	min-width: 100%;
+}
+
+.hider > * {
+	display: none;
 }
 
 

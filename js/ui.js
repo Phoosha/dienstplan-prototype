@@ -60,3 +60,19 @@ $('td.selectable a').on('click', function(event) {
 }).on('mouseleave', function(event) {
 	$(this).parents().removeClass('dehover');
 });
+
+
+/****************************************************************
+ * Allow hiding of past days
+ ****************************************************************/
+ $('tr.hideable').hide();
+ $('#hider-show').show().on('click', function() {
+	 $('tr.hideable').show();
+	 $(this).hide();
+	 $('#hider-hide').show();
+ });
+ $('#hider-hide').on('click', function() {
+	 $('tr.hideable').hide();
+	 $(this).hide();
+	 $('#hider-show').show();
+ });

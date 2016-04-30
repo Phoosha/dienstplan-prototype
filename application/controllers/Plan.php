@@ -129,6 +129,7 @@ class Plan extends CI_Controller {
 		$data['disp_times'] = $this->config->item('shift_display_times', 'dienstplan');
 		$data['allow_add']	= $allow_add;
 		$data['cur_day']	= explode('-', $cur_shift)[0];
+		$data['show_day']	= $data['cur_day'] - $this->config->item('hide_days_threshold', 'dienstplan');
 		
 		// Setup a calendar object for rendering the navigation
 		// This should come last so it doesn't overwrite the calendar

@@ -32,12 +32,22 @@
 			$day	= (int) $day_s;
 			$shift_count = count($disp_times);
 			
-			$today = "";
-			if ($day == $cur_day) {
-				$today ="today";
+			$today		= "";
+			$hideable	= "";
+			if ($day < $show_day) {
+				$hideable = "hideable";
+			} else if ($day === $show_day) {
+?>
+		<tr id="hidden" class="hider"><td colspan="5" id="hider-show"><a href="<?php echo current_url() ?>#show"><i class="fa fa-plus-square-o inline-icon" aria-hidden="true"></i>Alle anzeigen</a></td></tr>
+		<tr id="show" class="hider"><td colspan="5" id="hider-hide"><a href="<?php echo current_url() ?>#hidden"><i class="fa fa-minus-square-o inline-icon" aria-hidden="true"></i>Vergangene ausblenden</a></td></tr>
+<?php
 			}
+			if ($day == $cur_day) {
+				$today = "today";
+			}
+			$row_attrs = "{$type} {$today} {$hideable}";
 			
-			echo "\n<tr class='{$type} {$today}'>\n";
+			echo "\n<tr class='{$row_attrs}'>\n";
 			echo "<td rowspan={$shift_count} id='day-{$day}'>{$wday_s},<br />$day_s.$month.$year</td>\n";
 			
 			$i = 0;
@@ -49,7 +59,7 @@
 				}
 				
 				if ($i !== 0) {
-					echo "\n<tr class='{$type} {$today}'>\n";
+					echo "\n<tr class='{$row_attrs}'>\n";
 				}
 				
 				echo "<td class=\"shift-name\"><p>{$time}</p></td>\n";
