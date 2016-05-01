@@ -362,6 +362,7 @@ class Plan extends CI_Controller {
 		$data['title']		= 'Dienst bearbeiten';
 		$data['menu']		= true;
 		$data['menu_id']	= 'plan';
+		$data['datepicker']	= true;
 		
 		$now		= time();
 		$message	= null;

@@ -65,5 +65,3 @@
 	<?php if ($edit) echo form_submit('delete', 'Dienst löschen', 'class="pure-button secondary-button danger-button" onclick="return confirm(\'Dienst wirklich löschen?\')"'); ?>
 	
 </form>
-
-<link rel="stylesheet" onload="downloadJQueryUI()" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">

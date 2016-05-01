@@ -48,7 +48,7 @@
 			$row_attrs = "{$type} {$today} {$hideable}";
 			
 			echo "\n<tr class='{$row_attrs}'>\n";
-			echo "<td rowspan={$shift_count} id='day-{$day}'>{$wday_s},<br />$day_s.$month.$year</td>\n";
+			echo "<td rowspan={$shift_count} class='day-name' id='day-{$day}'>{$wday_s},<br />$day_s.$month.$year</td>\n";
 			
 			$i = 0;
 			foreach ($disp_times as $time) {
