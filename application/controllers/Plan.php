@@ -304,7 +304,7 @@ class Plan extends CI_Controller {
 		$data['menu']		= true;
 		$data['menu_id']	= 'plan';
 		
-		if (!isset($_POST['save'])) {
+		if (! isset($_POST['save'])) {
 			redirect("plan/show/{$year}/{$month}", 'refresh');
 		}
 		unset($_POST['save']); // Don't need this value anymore
@@ -313,6 +313,18 @@ class Plan extends CI_Controller {
 		if ($this->input->post('user_id') && $this->ion_auth->is_admin()) {
 			$user_id = $this->input->post('user_id');
 			unset($_POST['user_id']);
+		}
+		
+		$with_internee = false;
+		if ($this->input->post('internee')) {
+			$with_internee = $this->input->post('internee');
+			unset($_POST['internee']);
+		}
+		
+		$out_of_service = false;
+		if ($this->input->post('outOfService')) {
+			$out_of_service = $this->input->post('outOfService');
+			unset($_POST['outOfService']);
 		}
 		
 		$duties 		= $this->_prefix_key_to_subarray($this->input->post(null));
@@ -335,6 +347,8 @@ class Plan extends CI_Controller {
 			$duty['user_id']	= $user_id;
 			$duty['start']		= $start;
 			$duty['end']		= $end;
+			$duty['internee']	= $with_internee;
+			$duty['outOfService'] = $out_of_service;
 			
 			$insert_duties[]	= $duty;
 		}
@@ -418,7 +432,8 @@ class Plan extends CI_Controller {
 						'vehicle'	=> $this->input->post('vehicle'),
 						'user_id'	=> $this->input->post('user_id'),
 						'comment'	=> $this->input->post('comment'),
-					));;
+						'internee'  => $this->input->post('internee'),
+					));
 				
 					if ($result) {
 						$this->session->set_flashdata('message', '<p class="success">Dienst wurde erfolgreich geändert</p>');
@@ -430,6 +445,7 @@ class Plan extends CI_Controller {
 						'vehicle'	=> $this->input->post('vehicle'),
 						'user_id'	=> $this->input->post('user_id'),
 						'comment'	=> $this->input->post('comment'),
+						'internee'  => $this->input->post('internee'),
 					));
 					
 					if ($result) {
@@ -454,8 +470,10 @@ class Plan extends CI_Controller {
 		$data['message'] = validation_errors() ? 
 			validation_errors() : $message;
 		
-		$duty_id	= round($duty_id);
-		$duty		= $this->plan_model->get_duty($duty_id);
+		if ($duty_id !== null) {
+			$duty_id	= round($duty_id);
+			$duty		= $this->plan_model->get_duty($duty_id);
+		}
 		
 		if (! isset($duty)) {
 			$data['title']	= 'Dienst hinzufügen';
@@ -464,8 +482,6 @@ class Plan extends CI_Controller {
 				'id'		=> '',
 				'start'		=> $now,
 				'end'		=> $now,
-				'vehicle'	=> $this->input->post('vehicle'),
-				'user_id'	=> $this->input->post('user_id') ? $this->input->post('user_id') : $this->ion_auth->get_user_id(),
 				'comment'	=> '',
 			);
 		} else {
@@ -477,7 +493,13 @@ class Plan extends CI_Controller {
 			'starttime'	=> $this->input->post('starttime') ? $this->input->post('starttime') : date('H', $duty['start']) .':00',
 			'enddate'	=> $this->input->post('enddate') ? $this->input->post('enddate') : date($this->_date_format, $duty['end']),
 			'endtime'	=> $this->input->post('endtime') ? $this->input->post('endtime') : date('H', $duty['end']) .':00',
+			'vehicle'	=> $this->input->post('vehicle') ? $this->input->post('vehicle') : 0,
+			'user_id'	=> $this->input->post('user_id') ? $this->input->post('user_id') : $this->ion_auth->get_user_id(),
 		));
+		
+		if (isset($_POST['add']) || isset($_POST['modify'])) {
+			$data['internee'] = $this->input->post('internee');
+		}
 		
 		$data['user_names']	= $this->user_model->get_user_names('members');
 		$data['vehicles']	= $this->plan_model->get_active_vehicles($now);
@@ -578,8 +600,10 @@ class Plan extends CI_Controller {
 						$slot_id				= "{$day}-{$i}-{$duty['vehicle']}";
 						
 						$shifts[$slot_id][]		= $shift;
-						$starts[$shift_id][]	= $duty['start'];
-						$ends[$shift_id][]		= $duty['end'];
+						if (! $duty['outOfService']) {
+							$starts[$shift_id][]	= $duty['start'];
+							$ends[$shift_id][]		= $duty['end'];
+						}
 					}
 				}
 			}

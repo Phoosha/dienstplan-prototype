@@ -17,6 +17,8 @@ class Plan_model extends CI_Model {
 			=> 'Dieser Dienst existiert nicht mehr',
 		'conflicting_insert'
 			=> 'Du darfst dich nicht für mehrere Dienste gleichzeitig eintragen',
+		'conflicting_service'
+			=> 'Das Fahrzeug, auf das du dich einträgst, ist außer Dienst',
 	);
 	
 	protected $error_start_delimiter	= '<p class="error">';
@@ -152,12 +154,42 @@ class Plan_model extends CI_Model {
 	 * Returns all duties of $user_id overlapping with $start and $end
 	 * times.
 	 */
-	public function get_conflicting_dutytimes($user_id, $start, $end, $duty_id = null) {	
+	public function get_conflicting_dutytimes($user_id = null, $start, $end, $duty_id = null) {	
 		$this->_duty_select();
 		if ($duty_id) {
 			$this->db->where('id !=', $duty_id);
 		}
-		$this->db->where('user_id', $user_id);
+		if ($user_id) {
+			$this->db->where('user_id', $user_id);
+		}
+		$this->db->where('outOfService', false);
+		$this->db->group_start();
+			// 1. All duties containing this interval
+			$this->db->or_group_start();
+				$this->db->where('start <=', $start);
+				$this->db->where('end >=', $end);
+			$this->db->group_end();
+			// 2. All duties which start in this interval
+			$this->db->or_group_start();
+				$this->db->where('start >', $start);
+				$this->db->where('start <', $end);
+			$this->db->group_end();
+			// 3. All duties which end in this interval
+			$this->db->or_group_start();
+				$this->db->where('end >', $start);
+				$this->db->where('end <', $end);
+			$this->db->group_end();
+		$this->db->group_end();
+		
+		$this->db->order_by('start ASC, end ASC');
+		$query = $this->db->get('dutytimes');
+		
+		return $query;
+	}
+	
+	public function get_service_dutytimes($start, $end, $vehicle, $duty_id = null) {
+		$this->db->where('outOfService', true);
+		$this->db->where('vehicle', $vehicle);
 		$this->db->group_start();
 			// 1. All duties containing this interval
 			$this->db->or_group_start();
@@ -232,6 +264,11 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
+		if (! $this->is_not_conflicting_service($duty)) {
+			$this->set_error('conflicting_service');
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -282,6 +319,11 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
+		if (! $this->is_not_conflicting_service($duty)) {
+			$this->set_error('conflicting_service');
+			return false;
+		}
+		
 		return $this->db->replace('dutytimes', $duty);
 	}
 	
@@ -305,6 +347,14 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
+		if (! isset($duty['internee'])) {
+			$duty['internee'] = false;
+		}
+		
+		if (! isset($duty['outOfService'])) {
+			$duty['outOfService'] = false;
+		}
+		
 		if ($check_id && ! isset($duty['id'])) {
 			return false;
 		}
@@ -316,6 +366,8 @@ class Plan_model extends CI_Model {
 		$duty['end']		= round($duty['end']);
 		$duty['vehicle']	= (int) $duty['vehicle'];
 		$duty['user_id']	= round($duty['user_id']);
+		$duty['outOfService'] = (boolean) $duty['outOfService'];
+		$duty['internee']	= $duty['internee'] && ! $duty['outOfService'];
 		
 		$this->load->model('user_model');
 		if (! $this->user_model->is_valid_user_id($duty['user_id'])) {
@@ -415,7 +467,25 @@ class Plan_model extends CI_Model {
 	 * Determines whether the current user is allowed to add $duty.
 	 */
 	public function is_allowed_to_add($duty) {
-		return $this->ion_auth->is_admin() || $duty['end'] >= time();
+		if (! $this->ion_auth->is_admin()) {
+			if ($duty['user_id'] !== $this->ion_auth->get_user_id()) {
+				return false;
+			}
+			
+			if ($duty['end'] < time()) {
+				return false;
+			}
+			
+			if ($duty['outOfService']) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public function is_allowed_to_service() {
+		return $this->ion_auth->is_admin();
 	}
 	
 	/*
@@ -429,6 +499,13 @@ class Plan_model extends CI_Model {
 		return $conflicts->num_rows() === 0;
 	}
 	
+	public function is_not_conflicting_service($duty) {
+		$conflicts = $this->get_service_dutytimes($duty['start'], $duty['end'], 
+			$duty['vehicle'], isset($duty['id']) ? $duty['id'] : null);
+			
+		return $conflicts->num_rows() === 0;
+	}
+	
 	public function are_overlap_free(&$duties) {
 		$sort_by = array();
 		foreach ($duties as $duty) {
@@ -438,9 +515,20 @@ class Plan_model extends CI_Model {
 		
 		$end = array();
 		foreach ($duties as $duty) {
-			$prev_end = isset($end[$duty['user_id']]) ? $end[$duty['user_id']] : 0;
-			if ($prev_end > $duty['start']) {
-				return false;
+			if (isset($end['service'])) {
+				if ($end['service'] > $duty['start']) {
+					return false;
+				}
+			}
+			
+			if (isset($end[$duty['user_id']])) {
+				if ($end[$duty['user_id']] > $duty['start']) {
+					return false;
+				} 
+			}
+			
+			if ($duty['outOfService']) {
+				$end['outOfService'] = $duty['end'];
 			} else {
 				$end[$duty['user_id']] = $duty['end'];
 			}

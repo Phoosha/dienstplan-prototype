@@ -2,31 +2,44 @@
 
 
 if (isset($shifts[$slot_id])) {
+	$out_of_service = $shifts[$slot_id][0]['duty']['outOfService'];
+	
 	foreach ($shifts[$slot_id] as $shift) {
 		echo "<p>\n";
 		
 		
 		echo '<span class="duty-time">';
 		if (isset($shift['start']) && isset($shift['end'])) {
-			echo "Von {$shift['start']} bis {$shift['end']} Uhr<br/>";
+			echo "Von {$shift['start']} bis {$shift['end']} Uhr<br/>\n";
 		} else if (isset($shift['start'])) {
-			echo "Ab {$shift['start']} Uhr<br/>";
+			echo "Ab {$shift['start']} Uhr<br/>\n";
 		} else if (isset($shift['end'])) {
-			echo "Bis {$shift['end']} Uhr<br/>";
+			echo "Bis {$shift['end']} Uhr<br/>\n";
 		}
 		echo "</span>\n";
 		
-		echo '<span class="duty-user">';
-			if (! $shift['duty']['locked']) {
-				echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">\n";
-			}
-			echo $shift['duty']['user'];
-			if (! $shift['duty']['locked']) {
-				echo '</a>';
-			}
-		echo "</span><br/>\n";;
+		if ($out_of_service) {
+			echo "<span class=\"out-of-service\">Außer Dienst</span><br/>\n";
+		}
+		
+		if (! $out_of_service || $this->ion_auth->is_admin()) {
+			echo '<span class="duty-user">';
+				if (! $shift['duty']['locked']) {
+					echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">\n";
+				}
+				echo $shift['duty']['user'];
+				if (! $shift['duty']['locked']) {
+					echo '</a>';
+				}
+			echo "</span><br/>\n";
+		}
 
-		echo "<span class=\"duty-comment\">{$shift['duty']['comment']}</span>\n";
+		echo "<span class=\"duty-comment\">\n";
+		if ($shift['duty']['internee']) {
+			echo "mit Praktikant<br/>\n";
+		}
+		echo $shift['duty']['comment'];
+		echo "</span>\n";;
 		
 		echo "</p>\n";
 	}

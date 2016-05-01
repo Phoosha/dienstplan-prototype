@@ -53,9 +53,9 @@ $('td.shift-slot').on('click', function() {
 });
 
 // Do not change selection when clicking links
-$('td.selectable a').on('click', function(event) {
+$('td a').on('click', function(event) {
 	event.stopPropagation();
-}).on('mouseenter', function(event) {
+}).filter('.selectable').on('mouseenter', function(event) {
 	$(this).parentsUntil('tr').addClass('dehover');
 }).on('mouseleave', function(event) {
 	$(this).parents().removeClass('dehover');

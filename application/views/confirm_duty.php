@@ -76,7 +76,13 @@
 	<?php if ($this->ion_auth->is_admin()): ?>
 		<label for="user_id">Fahrer: </label>
 		<?php echo form_dropdown('user_id', $users, $this->ion_auth->get_user_id()); ?>
+		<label for="outOfService" class="pure-checkbox">
+			<?php echo form_checkbox('outOfService', '1', FALSE, 'id="outOfService"'); ?> außer Dienst (Werkstatt)
+		</label>
 	<?php endif ?>
+		<label for="internee" class="pure-checkbox">
+			<?php echo form_checkbox('internee', '1', FALSE, 'id="internee"'); ?> mit Praktikant
+		</label>
 	</fieldset>
 
 	<fieldset class="bottom-wrapper">

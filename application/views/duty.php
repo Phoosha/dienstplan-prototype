@@ -21,10 +21,13 @@
 	<input name="id" value="<?php echo $id; ?>" hidden></input>
 	
 	<fieldset><div class="pure-g">
-		<div class="pure-u-5-8"><div class="input-box">
-			<label for="user_id">Fahrer: </label>
-			<?php echo form_dropdown('user_id', $user_names, $user_id); ?>
-		</div></div>
+		<div class="pure-u-5-8">
+			<div class="input-box">
+				<label for="user_id">Fahrer: </label>
+				<?php echo form_dropdown('user_id', $user_names, $user_id); ?>
+			</div>
+			<label for="internee" class="pure-checkbox"><?php echo form_checkbox('internee', '1', $internee, 'id="internee"'); ?> mit Praktikant</label>
+		</div>
 		
 		<div class="pure-u-3-8"><div class="input-box">
 			<label for="vehicle">Fahrzeug: </label>

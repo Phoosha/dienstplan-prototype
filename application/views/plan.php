@@ -45,9 +45,9 @@
 			if ($day == $cur_day) {
 				$today = "today";
 			}
-			$row_attrs = "{$type} {$today} {$hideable}";
+			$row_classes = "{$type} {$today} {$hideable}";
 			
-			echo "\n<tr class='{$row_attrs}'>\n";
+			echo "\n<tr class='{$row_classes}'>\n";
 			echo "<td rowspan={$shift_count} class='day-name' id='day-{$day}'>{$wday_s},<br />$day_s.$month.$year</td>\n";
 			
 			$i = 0;
@@ -59,7 +59,7 @@
 				}
 				
 				if ($i !== 0) {
-					echo "\n<tr class='{$row_attrs}'>\n";
+					echo "\n<tr class='{$row_classes}'>\n";
 				}
 				
 				echo "<td class=\"shift-name\"><p>{$time}</p></td>\n";
@@ -67,14 +67,22 @@
 				$j = 0;
 				foreach ($vehicles as $vehicle) {
 					$slot_id	= "{$day}-{$i}-{$j}";
-					$empty		= '';
-					if (! isset($continuity[$shift_id]) || $continuity[$shift_id] === 0) {
-						$empty = "empty-slot";
-					} else if ($continuity[$shift_id] < 2) {
-						$empty = "alone-slot";
+					
+					if (isset($shifts[$slot_id]) && $shifts[$slot_id][0]['duty']['outOfService']
+							&& ! isset($shifts[$slot_id][0]['start']) && ! isset($shifts[$slot_id][0]['end'])) {
+						$slot_classes = "out-of-service";
+					} else {
+						$empty = '';
+						if (! isset($continuity[$shift_id]) || $continuity[$shift_id] === 0) {
+							$empty = "empty-slot";
+						} else if ($continuity[$shift_id] < 2) {
+							$empty = "alone-slot";
+						}
+						$slot_classes = "{$disabled} {$empty}";
 					}
 					
-					echo "<td class=\"shift-slot {$disabled} {$empty}\" name=shift-".$shift_id.">\n";
+					
+					echo "<td class=\"shift-slot {$slot_classes}\" name=\"shift-".$shift_id."\">\n";
 					$this->load->view('shift_slot', array('slot_id' => $slot_id, 'shift_id' => $shift_id, 'add' => $add));
 					echo "</td>\n";
 					
