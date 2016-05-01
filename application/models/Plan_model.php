@@ -15,6 +15,8 @@ class Plan_model extends CI_Model {
 			=> 'Du darfst diesen Dienst nicht mehr verändern oder löschen',
 		'nonexistant_duty'
 			=> 'Dieser Dienst existiert nicht mehr',
+		'conflicting_insert'
+			=> 'Du darfst dich nicht für mehrere Dienste gleichzeitig eintragen',
 	);
 	
 	protected $error_start_delimiter	= '<p class="error">';
@@ -201,6 +203,11 @@ class Plan_model extends CI_Model {
 			if (! $this->check_insert_dutytime($duty)) {
 				return false;
 			}
+		}
+
+		if (! $this->are_overlap_free($duties)) {
+			$this->set_error('conflicting_insert');
+			return false;
 		}
 		
 		return $this->db->insert_batch('dutytimes', $duties);
@@ -420,6 +427,26 @@ class Plan_model extends CI_Model {
 			isset($duty['id']) ? $duty['id'] : null);
 		
 		return $conflicts->num_rows() === 0;
+	}
+	
+	public function are_overlap_free(&$duties) {
+		$sort_by = array();
+		foreach ($duties as $duty) {
+			$sort_by[] = $duty['start'];
+		}
+		array_multisort($sort_by, SORT_ASC|SORT_NUMERIC, $duties);
+		
+		$end = array();
+		foreach ($duties as $duty) {
+			$prev_end = isset($end[$duty['user_id']]) ? $end[$duty['user_id']] : 0;
+			if ($prev_end > $duty['start']) {
+				return false;
+			} else {
+				$end[$duty['user_id']] = $duty['end'];
+			}
+		}
+		
+		return true;
 	}
 	
 	public function set_error($error) {

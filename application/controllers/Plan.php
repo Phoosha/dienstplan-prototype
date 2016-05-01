@@ -821,7 +821,7 @@ class Plan extends CI_Controller {
 	function _determine_continuation($offsets, $target_value, $starts, $ends) {
 
 		// Work linearly from the smallest value to the biggest
-		array_multisort($starts, SORT_NUMERIC, $ends);
+		array_multisort($starts, SORT_ASC|SORT_NUMERIC, $ends);
 		sort($offsets, SORT_NUMERIC);
 		
 		/*
