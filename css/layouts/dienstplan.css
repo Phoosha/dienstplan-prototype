@@ -548,6 +548,12 @@ td.dehover:hover {
 	min-width: 100%;
 }
 
+.duty-need-driver {
+	font-weight: bold;
+	color: red;
+	min-width: 100%;
+}
+
 .hider > * {
 	display: none;
 }

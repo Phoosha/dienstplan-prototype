@@ -18,8 +18,6 @@
 	
 	<div id="infoMessage"><?php echo $message; ?></div>
 	
-	<input name="id" value="<?php echo $id; ?>" hidden></input>
-	
 	<fieldset><div class="pure-g">
 		<div class="pure-u-5-8">
 			<div class="input-box">

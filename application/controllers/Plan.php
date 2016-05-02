@@ -104,16 +104,21 @@ class Plan extends CI_Controller {
 		
 		// Set current day if we're displaying the current month
 		$cur_date	= $this->_get_year_month_day($now);
-		$cur_day	= $cur_date['day'];
 		$cur_month	= $cur_date['month'];
 		$cur_year	= $cur_date['year'];
 		$cur_shift	= $this->_get_current_shift_id($year, $month, $now);
+		$cur_day	= explode('-', $cur_shift)[0]; // might differ from now's day
 		
 		$allow_add	= $cur_shift === '0-0' ? '1-0' : $cur_shift;
 		if ($this->ion_auth->is_admin()) {
 			$allow_add = '1-0'; // always
 		} else if ($year < $cur_year || $month < $cur_month) {
 			$allow_add = 'never';
+		}
+		
+		$show_day = $cur_day - $this->config->item('visible_past_days', 'dienstplan');
+		if ($show_day <= $this->config->item('hide_days_threshold', 'dienstplan')) {
+			$show_day = 0;
 		}
 		
 		list($shifts, $continuity) = $this->_prepare_view_shifts($year, $month);
@@ -128,8 +133,8 @@ class Plan extends CI_Controller {
 		$data['continuity']	= $continuity;
 		$data['disp_times'] = $this->config->item('shift_display_times', 'dienstplan');
 		$data['allow_add']	= $allow_add;
-		$data['cur_day']	= explode('-', $cur_shift)[0];
-		$data['show_day']	= $data['cur_day'] - $this->config->item('hide_days_threshold', 'dienstplan');
+		$data['cur_day']	= $cur_day;
+		$data['show_day']	= $show_day;
 		
 		// Setup a calendar object for rendering the navigation
 		// This should come last so it doesn't overwrite the calendar
@@ -384,17 +389,7 @@ class Plan extends CI_Controller {
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('<p class="error">', '</p>');
 		
-		// For modify and delete the id is needed
-		if (isset($_POST['delete'])) {
-			$this->form_validation->set_rules('id', 'ID', 'required|is_natural');
-			
-		} else {
-			if (isset($_POST['modify'])) {
-				$this->form_validation->set_rules('id', 'ID', 'required|is_natural');
-			} else {
-				$this->form_validation->set_rules('add', 'Anfragetyp', 'required');
-			}
-			
+		if (isset($_POST['add']) || isset($_POST['modify'])) {
 			// modify and add require more values
 			$this->form_validation->set_rules('vehicle', 'Fahrzeug', 'required|is_natural');
 			$this->form_validation->set_rules('startdate', 'Dienstanfang', 'required');
@@ -402,8 +397,10 @@ class Plan extends CI_Controller {
 			$this->form_validation->set_rules('enddate', 'Dienstende', 'required');
 			$this->form_validation->set_rules('endtime', 'Dienstende', 'required|exact_length[5]');
 			$this->form_validation->set_rules('user_id', 'Fahrer', 'required|is_natural');
-			$this->form_validation->set_rules('comment', 'Kommentar', 'max_length[100]|trim|htmlspecialchars');
-		}		
+			$this->form_validation->set_rules('comment', 'Kommentar', 'max_length[100]|trim|htmlspecialchars');	
+		} else {
+			$this->form_validation->set_rules('delete', 'Anfragetyp', 'required');
+		}
 		
 		// We just require some basic parameters here and leave the checking to the model
 		if ($this->form_validation->run() === true) {
@@ -413,7 +410,7 @@ class Plan extends CI_Controller {
 			
 			// Determine which action to perform	
 			if (isset($_POST['delete'])) {
-				$result = $this->plan_model->delete_dutytime($this->input->post('id'));
+				$result = $this->plan_model->delete_dutytime($duty_id);
 				
 				if ($result) {
 					$this->session->set_flashdata('message', '<p class="success">Dienst wurde erfolgreich gelöscht</p>');
@@ -426,7 +423,7 @@ class Plan extends CI_Controller {
 				
 				if (isset($_POST['modify'])) {
 					$result = $this->plan_model->replace_dutytime(array(
-						'id'		=> $this->input->post('id'),
+						'id'		=> $duty_id,
 						'start'		=> $start,
 						'end'		=> $end,
 						'vehicle'	=> $this->input->post('vehicle'),
@@ -483,23 +480,33 @@ class Plan extends CI_Controller {
 				'start'		=> $now,
 				'end'		=> $now,
 				'comment'	=> '',
+				'user_id'	=> $this->ion_auth->get_user_id(),
+				'vehicle'	=> 0,
+				'internee'	=> false,
 			);
 		} else {
 			$data['title']	= 'Dienst bearbeiten';
 		}
 		
-		$data = array_merge($data, $duty, array(
-			'startdate'	=> $this->input->post('startdate') ? $this->input->post('startdate') : date($this->_date_format, $duty['start']),
-			'starttime'	=> $this->input->post('starttime') ? $this->input->post('starttime') : date('H', $duty['start']) .':00',
-			'enddate'	=> $this->input->post('enddate') ? $this->input->post('enddate') : date($this->_date_format, $duty['end']),
-			'endtime'	=> $this->input->post('endtime') ? $this->input->post('endtime') : date('H', $duty['end']) .':00',
-			'vehicle'	=> $this->input->post('vehicle') ? $this->input->post('vehicle') : 0,
-			'user_id'	=> $this->input->post('user_id') ? $this->input->post('user_id') : $this->ion_auth->get_user_id(),
-		));
+		$use_post = array('startdate', 'starttime', 'enddate', 'endtime', 'vehicle', 'comment', 'vehicle', 'user_id');
+		
+		$submitted = array();
+		foreach ($use_post as $k) {
+			if ($this->input->post($k) !== null) {
+				$submitted[$k] = $this->input->post($k);
+			}
+		}
 		
 		if (isset($_POST['add']) || isset($_POST['modify'])) {
-			$data['internee'] = $this->input->post('internee');
+			$submitted['internee'] = isset($_POST['internee']);
 		}
+		
+		$data = array_merge($data, $duty, array(
+					'startdate'	=> date($this->_date_format, $duty['start']),
+					'starttime'	=> date('H', $duty['start']) .':00',
+					'enddate'	=> date($this->_date_format, $duty['end']),
+					'endtime'	=> date('H', $duty['end']) .':00',
+				), $submitted);
 		
 		$data['user_names']	= $this->user_model->get_user_names('members');
 		$data['vehicles']	= $this->plan_model->get_active_vehicles($now);
@@ -560,6 +567,9 @@ class Plan extends CI_Controller {
 			
 			// Resolve id to user name
 			$duty['user'] 		= $this->user_model->get_full_name($duty['user_id']);
+			if (! $duty['mayDrive']) {
+				$duty['hasDriver'] = $this->plan_model->has_driver($duty);
+			}
 			
 			// Set some start and end times
 			$duty_start			= $duty['start'];
@@ -597,10 +607,10 @@ class Plan extends CI_Controller {
 					$shift			= $this->_prepare_shift($duty, $shift_start, $shift_end, $shift_id);
 					
 					if (isset($shift)) {
-						$slot_id				= "{$day}-{$i}-{$duty['vehicle']}";
 						
+						$slot_id				= "{$day}-{$i}-{$duty['vehicle']}";						
 						$shifts[$slot_id][]		= $shift;
-						if (! $duty['outOfService']) {
+						if (! $duty['outOfService'] && ($duty['mayDrive'] || $duty['hasDriver'])) {
 							$starts[$shift_id][]	= $duty['start'];
 							$ends[$shift_id][]		= $duty['end'];
 						}

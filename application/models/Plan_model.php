@@ -2,7 +2,7 @@
 
 class Plan_model extends CI_Model {
 	
-	protected $errors;
+	protected $error_list;
 	
 	protected $error_messages = array(
 		'start_before_end'
@@ -26,7 +26,8 @@ class Plan_model extends CI_Model {
 	
 	public function __construct()
 	{
-		$errors = array();
+		parent::__construct();
+		$this->error_list = array();
 		$this->load->database();
 	}
 	
@@ -98,9 +99,18 @@ class Plan_model extends CI_Model {
 		$user_id		= $this->ion_auth->get_user_id();
 		
 		if ($this->ion_auth->is_admin()) {
-			$this->db->select("*, 0 AS locked");
+			$this->db->select("*, 0 AS `locked`, (user_id IN (
+					SELECT users_groups.user_id FROM users_groups 
+					JOIN groups ON groups.id = users_groups.group_id 
+					WHERE groups.name = 'drivers'
+				)) AS `mayDrive`", false);
 		} else {
-			$this->db->select("*, (start <= {$locked_before} OR user_id <> {$user_id}) AS locked");
+			$this->db->select("*, (start <= '{$locked_before}' OR user_id <> '{$user_id}') AS locked,
+				(user_id IN (
+					SELECT users_groups.user_id FROM users_groups 
+					JOIN groups ON groups.id = users_groups.group_id 
+					WHERE groups.name = 'drivers'
+				)) AS `mayDrive`", false);
 		}
 	}
 	
@@ -126,60 +136,40 @@ class Plan_model extends CI_Model {
 	 * Format:
 	 * 	id, start, end, comment, user_id, vehicle, locked
 	 */
-	public function get_dutytimes($start, $end) {		
+	public function get_dutytimes($start, $end, $duty_id = null, $user_id = null, $mayDrive = null, $complete = false) {
 		$this->_duty_select();
+		
+		if ($duty_id !== null) {
+			$this->db->where('id !=', $duty_id);
+		}
+		if ($user_id !== null) {
+			$this->db->where('user_id', $user_id);
+		}
+		if ($mayDrive !== null) {
+			$this->db->where("user_id IN (
+					SELECT users_groups.user_id FROM users_groups 
+					JOIN groups ON groups.id = users_groups.group_id 
+					WHERE groups.name = 'drivers'
+				)");
+		}
+		
 		// 1. All duties containing the intervall
 		$this->db->group_start();
 			$this->db->where('start <=', $start);
 			$this->db->where('end >=', $end);
 		$this->db->group_end();
-		// 2. All duties which start within
-		$this->db->or_group_start();
-			$this->db->where('start >', $start);
-			$this->db->where('start <', $end);
-		$this->db->group_end();
-		// 3. All duties which end within
-		$this->db->or_group_start();
-			$this->db->where('end >', $start);
-			$this->db->where('end <', $end);
-		$this->db->group_end();	
-		
-		$this->db->order_by('start ASC, end ASC');
-		$query = $this->db->get('dutytimes');
-		
-		return $query;
-	}
-	
-	/*
-	 * Returns all duties of $user_id overlapping with $start and $end
-	 * times.
-	 */
-	public function get_conflicting_dutytimes($user_id = null, $start, $end, $duty_id = null) {	
-		$this->_duty_select();
-		if ($duty_id) {
-			$this->db->where('id !=', $duty_id);
-		}
-		if ($user_id) {
-			$this->db->where('user_id', $user_id);
-		}
-		$this->db->where('outOfService', false);
-		$this->db->group_start();
-			// 1. All duties containing this interval
-			$this->db->or_group_start();
-				$this->db->where('start <=', $start);
-				$this->db->where('end >=', $end);
-			$this->db->group_end();
-			// 2. All duties which start in this interval
+		if (! $complete) {
+			// 2. All duties which start within
 			$this->db->or_group_start();
 				$this->db->where('start >', $start);
 				$this->db->where('start <', $end);
 			$this->db->group_end();
-			// 3. All duties which end in this interval
+			// 3. All duties which end within
 			$this->db->or_group_start();
 				$this->db->where('end >', $start);
 				$this->db->where('end <', $end);
 			$this->db->group_end();
-		$this->db->group_end();
+		}
 		
 		$this->db->order_by('start ASC, end ASC');
 		$query = $this->db->get('dutytimes');
@@ -190,28 +180,12 @@ class Plan_model extends CI_Model {
 	public function get_service_dutytimes($start, $end, $vehicle, $duty_id = null) {
 		$this->db->where('outOfService', true);
 		$this->db->where('vehicle', $vehicle);
-		$this->db->group_start();
-			// 1. All duties containing this interval
-			$this->db->or_group_start();
-				$this->db->where('start <=', $start);
-				$this->db->where('end >=', $end);
-			$this->db->group_end();
-			// 2. All duties which start in this interval
-			$this->db->or_group_start();
-				$this->db->where('start >', $start);
-				$this->db->where('start <', $end);
-			$this->db->group_end();
-			// 3. All duties which end in this interval
-			$this->db->or_group_start();
-				$this->db->where('end >', $start);
-				$this->db->where('end <', $end);
-			$this->db->group_end();
-		$this->db->group_end();
 		
-		$this->db->order_by('start ASC, end ASC');
-		$query = $this->db->get('dutytimes');
-		
-		return $query;
+		return $this->get_dutytimes($start, $end, $duty_id);
+	}
+	
+	public function has_driver($duty) {
+		return $this->get_dutytimes($duty['start'], $duty['end'], null, null, true, true)->num_rows() !== 0;
 	}
 	
 	/*
@@ -493,8 +467,8 @@ class Plan_model extends CI_Model {
 	 * user.
 	 */
 	public function is_not_conflicting($duty) {
-		$conflicts = $this->get_conflicting_dutytimes($duty['user_id'], $duty['start'], $duty['end'], 
-			isset($duty['id']) ? $duty['id'] : null);
+		$conflicts = $this->get_dutytimes($duty['start'], $duty['end'],
+			isset($duty['id']) ? $duty['id'] : null, $duty['user_id']);
 		
 		return $conflicts->num_rows() === 0;
 	}
@@ -538,13 +512,13 @@ class Plan_model extends CI_Model {
 	}
 	
 	public function set_error($error) {
-		$this->errors[] = $error;
+		$this->error_list[] = $error;
 	}
 	
 	public function errors() {
 		$msg = '';
 		
-		foreach ($this->errors as $error) {
+		foreach ($this->error_list as $error) {
 			$msg .= $this->error_start_delimiter . $this->error_messages[$error] . $this->error_end_delimiter;
 		}
 		

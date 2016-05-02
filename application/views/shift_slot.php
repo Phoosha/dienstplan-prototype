@@ -19,22 +19,30 @@ if (isset($shifts[$slot_id])) {
 		echo "</span>\n";
 		
 		if ($out_of_service) {
-			echo "<span class=\"out-of-service\">Außer Dienst</span><br/>\n";
+			echo "<span class=\"out-of-service\">Außer Dienst<i class=\"fa fa-wrench inline-icon\" aria-hidden=\"true\"></i></span><br/>\n";
 		}
 		
 		if (! $out_of_service || $this->ion_auth->is_admin()) {
 			echo '<span class="duty-user">';
 				if (! $shift['duty']['locked']) {
-					echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">\n";
+					echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">";
 				}
 				echo $shift['duty']['user'];
 				if (! $shift['duty']['locked']) {
 					echo '</a>';
 				}
+				if (! $shift['duty']['mayDrive']) {
+					echo '<i class="fa fa-exclamation-triangle inline-icon" aria-hidden="true"></i>';
+				}
 			echo "</span><br/>\n";
 		}
+		
+		
 
 		echo "<span class=\"duty-comment\">\n";
+		if (! $shift['duty']['mayDrive'] && ! $shift['duty']['hasDriver']) {
+			echo "<span class=\"duty-need-driver\">Braucht Fahrer!</span><br/>\n";
+		}
 		if ($shift['duty']['internee']) {
 			echo "mit Praktikant<br/>\n";
 		}
