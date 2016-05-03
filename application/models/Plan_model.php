@@ -140,10 +140,10 @@ class Plan_model extends CI_Model {
 		$this->_duty_select();
 		
 		if ($duty_id !== null) {
-			$this->db->where('id !=', $duty_id);
+			$this->db->where('id !=', round($duty_id));
 		}
 		if ($user_id !== null) {
-			$this->db->where('user_id', $user_id);
+			$this->db->where('user_id', round($user_id));
 		}
 		if ($mayDrive !== null) {
 			$this->db->where("user_id IN (
@@ -153,23 +153,25 @@ class Plan_model extends CI_Model {
 				)");
 		}
 		
-		// 1. All duties containing the intervall
 		$this->db->group_start();
-			$this->db->where('start <=', $start);
-			$this->db->where('end >=', $end);
+			// 1. All duties containing the intervall
+			$this->db->group_start();
+				$this->db->where('start <=', round($start));
+				$this->db->where('end >=', round($end));
+			$this->db->group_end();
+			if (! $complete) {
+				// 2. All duties which start within
+				$this->db->or_group_start();
+					$this->db->where('start >', round($start));
+					$this->db->where('start <', round($end));
+				$this->db->group_end();
+				// 3. All duties which end within
+				$this->db->or_group_start();
+					$this->db->where('end >', round($start));
+					$this->db->where('end <', round($end));
+				$this->db->group_end();
+			}
 		$this->db->group_end();
-		if (! $complete) {
-			// 2. All duties which start within
-			$this->db->or_group_start();
-				$this->db->where('start >', $start);
-				$this->db->where('start <', $end);
-			$this->db->group_end();
-			// 3. All duties which end within
-			$this->db->or_group_start();
-				$this->db->where('end >', $start);
-				$this->db->where('end <', $end);
-			$this->db->group_end();
-		}
 		
 		$this->db->order_by('start ASC, end ASC');
 		$query = $this->db->get('dutytimes');
@@ -197,6 +199,8 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
+		$duty['modified_on'] = time();
+		
 		return $this->db->insert('dutytimes', $duty);
 	}
 	
@@ -209,6 +213,8 @@ class Plan_model extends CI_Model {
 			if (! $this->check_insert_dutytime($duty)) {
 				return false;
 			}
+			
+			$duty['modified_on'] = time();
 		}
 
 		if (! $this->are_overlap_free($duties)) {
@@ -297,6 +303,8 @@ class Plan_model extends CI_Model {
 			$this->set_error('conflicting_service');
 			return false;
 		}
+		
+		$duty['modified_on'] = time();
 		
 		return $this->db->replace('dutytimes', $duty);
 	}

@@ -39,6 +39,7 @@ class User extends CI_Controller {
 			$data['title']		= 'Mein Konto';
 			$data['menu']		= true;
 			$data['menu_id']	= 'settings';
+			$data['user']		= $this->ion_auth->user($this->ion_auth->get_user_id())->row_array();
 		
 			$this->load->template('usersettings', $data);
 		}

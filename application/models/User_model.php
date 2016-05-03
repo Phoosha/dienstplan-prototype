@@ -72,4 +72,17 @@ class User_model extends CI_Model {
 		return $user === 1;
 	}
 	
+	public function get_by_remote_code($code) {
+		$this->db->select('id');
+		$this->db->where('remote_code <>', null);
+		$this->db->where('remote_code', $code);
+		$this->db->limit(1);
+		$result = $this->db->get('users')->row_array();
+		
+		if (! empty($result)) {
+			return $result['id'];
+		}
+		return null;
+	}
+	
 }

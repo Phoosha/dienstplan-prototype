@@ -765,7 +765,10 @@ class Plan extends CI_Controller {
 	 * Returns the year and month and day for $time based on the
 	 * associated shift.
 	 */
-	function _get_year_month_day($time) {
+	function _get_year_month_day($time = null) {
+		if ($time === null) {
+			$time = time();
+		}
 		$year			= date('Y', $time);
 		$month			= date('n', $time);
 		$day			= date('j', $time);
