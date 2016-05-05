@@ -11,5 +11,6 @@ $config['visible_past_days']	= 1;
 $config['hide_days_threshold']	= 2;
 
 $config['calendar_domain']		= "localhost";
+$config['calendar_uid_seed']	= "cae9ec6276d4e1c67bf64173024ad40e";
 $config['calendar_start_dist']	= 2678400; // 60 * 60 * 24 * 31 seconds
 $config['calendar_end_dist']	= 2678400; // 60 * 60 * 24 * 31 seconds

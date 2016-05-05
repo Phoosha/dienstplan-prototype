@@ -199,7 +199,9 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
-		$duty['modified_on'] = time();
+		$now = time();
+		$duty['modified_on'] = $now;
+		$duty['created_on'] = $now;
 		
 		return $this->db->insert('dutytimes', $duty);
 	}
@@ -208,13 +210,15 @@ class Plan_model extends CI_Model {
 	 * Batch inserts multiples duties into the DB as one transaction.
 	 */
 	public function insert_batch_dutytimes($duties) {
+		$now = time();
 		
 		foreach ($duties as &$duty) {
 			if (! $this->check_insert_dutytime($duty)) {
 				return false;
 			}
 			
-			$duty['modified_on'] = time();
+			$duty['modified_on'] = $now;
+			$duty['created_on'] = $now;
 		}
 
 		if (! $this->are_overlap_free($duties)) {
@@ -304,9 +308,12 @@ class Plan_model extends CI_Model {
 			return false;
 		}
 		
-		$duty['modified_on'] = time();
+		$now = time();
+		$duty['modified_on'] = $now;
 		
-		return $this->db->replace('dutytimes', $duty);
+		$this->db->where('id', $duty['id']);
+		$this->db->set('sequence', 'sequence + 1', false);
+		return $this->db->update('dutytimes', $duty);
 	}
 	
 	/*
@@ -369,6 +376,10 @@ class Plan_model extends CI_Model {
 			$this->set_error('comment_too_long');
 			return false;
 		}
+		
+		// Unset those two because they are not necessarily always set on update or insert
+		unset($duty['created_on']);
+		unset($duty['sequence']);
 			
 		return true;
 	}
