@@ -503,9 +503,9 @@ class Plan extends CI_Controller {
 		
 		$data = array_merge($data, $duty, array(
 					'startdate'	=> date($this->_date_format, $duty['start']),
-					'starttime'	=> date('H', $duty['start']) .':00',
+					'starttime'	=> date('H', $duty['start']) .':'. $this->_get_minutes($duty['start']),
 					'enddate'	=> date($this->_date_format, $duty['end']),
-					'endtime'	=> date('H', $duty['end']) .':00',
+					'endtime'	=> date('H', $duty['end']) .':'. $this->_get_minutes($duty['end']),
 				), $submitted);
 		
 		$data['user_names']	= $this->user_model->get_user_names('members');
@@ -513,6 +513,15 @@ class Plan extends CI_Controller {
 		$data['time_list']	= $this->_time_list;
 		
 		$this->load->template('duty', $data);
+	}
+	
+	function _get_minutes($time) {
+		$minutes = date('i', $time);
+		if ($minutes < 30) {
+			return '00';
+		} else {
+			return '30';
+		}
 	}
 	
 	/*
