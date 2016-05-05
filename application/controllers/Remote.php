@@ -34,6 +34,8 @@ class Remote extends CI_Controller {
 		$data['vehicles']	= $this->plan_model->get_active_vehicles($start_time);
 		$data['domain']		= $this->config->item('calendar_domain', 'dienstplan');
 		$data['cal_seed']	= $this->config->item('calendar_uid_seed', 'dienstplan');
+		$data['prodid']		= $this->config->item('calendar_prodid', 'dienstplan');
+		$data['method']		= 'PUBLISH';
 		
 		$this->output->set_content_type('text/calendar; charset="utf-8"; method=PUBLISH');
 		$this->output->set_header("Content-Disposition: attachment; filename={$file_name}");

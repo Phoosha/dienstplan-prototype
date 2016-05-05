@@ -1,9 +1,11 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); 
+$ICAL_DATE = 'Ymd\THis\Z' ?>
 BEGIN:VCALENDAR
-PRODID:<?php echo site_url(); ?>
+PRODID:<?php echo empty($prodid) ? site_url() : $prodid; ?>
 
 VERSION:2.0
-METHOD:PUBLISH
+METHOD:<?php echo empty($method) ? "PUBLISH" : $method; ?>
+
 CALSCALE:GREGORIAN
 X-WR-CALNAME:<?php echo $name; ?>
 
@@ -12,17 +14,17 @@ X-WR-TIMEZONE:<?php echo date('e') ?>
 <?php foreach ($duties as $duty): 
 	if ($duty['outOfService']) continue; ?>
 BEGIN:VEVENT
-UID:<?php echo md5($duty['id'].$domain.$cal_seed).'@'.$domain ?>
+UID:<?php echo md5($duty['id'].$duty['created_on'].$domain.$cal_seed).'@'.$domain ?>
 
-DTSTAMP:<?php echo date('Ymd\THis\Z', local_to_gmt($duty['modified_on'])); ?>
+DTSTAMP:<?php echo date($ICAL_DATE, local_to_gmt($duty['modified_on'])); ?>
 
-DTSTART:<?php echo date('Ymd\THis\Z', local_to_gmt($duty['start'])); ?>
+DTSTART:<?php echo date($ICAL_DATE, local_to_gmt($duty['start'])); ?>
 
-DTEND:<?php echo date('Ymd\THis\Z', local_to_gmt($duty['end'])); ?>
+DTEND:<?php echo date($ICAL_DATE, local_to_gmt($duty['end'])); ?>
 
-LAST-MODIFIED:<?php echo date('Ymd\THis\Z', local_to_gmt($duty['modified_on'])); ?>
+LAST-MODIFIED:<?php echo date($ICAL_DATE, local_to_gmt($duty['modified_on'])); ?>
 
-CREATED:<?php echo date('Ymd\THis\Z', local_to_gmt($duty['created_on'])); ?>
+CREATED:<?php echo date($ICAL_DATE, local_to_gmt($duty['created_on'])); ?>
 
 SEQUENCE:<?php echo $duty['sequence']; ?>
 
