@@ -149,7 +149,7 @@ a {
 
 a:hover {
 	text-decoration: underline;
-	color: #116298;
+	/*color: #116298;*/
 }
 
 .inline-icon {
@@ -182,6 +182,38 @@ a:hover {
 	}
 
 
+/* -- Button styles -----------------------------------------------------*/
+
+.primary-button,
+.secondary-button {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    border-radius: 11px;
+}
+.primary-button {
+    color: #fff;
+    background: #1b98f8;
+}
+.secondary-button {
+    background: #fff;
+    border: 1px solid #aaa;
+    color: #666;
+    font-size: 95%
+}
+
+.danger-button {
+	border-color: #a44;
+	background-color: #d55;
+	color: #fff;
+}
+
+.icon-button {
+	padding: 0.5em;
+	margin: 0 0.2em;
+}
+
+
 /* -- Menu -----------------------------------------------------------------*/
 
 #logo {
@@ -207,13 +239,13 @@ a:hover {
     -webkit-overflow-scrolling: touch;
 }
 	#menu .primary-button {
-		margin: 1em 0;
+		margin: 1em 0.6em;
 	}
 	
     /*
     All anchors inside the menu should be styled like this.
     */
-    #menu a {
+    #menu .pure-menu-list a {
         color: #999;
         border: none;
         padding: 0.6em 0 0.6em 0.6em;
@@ -372,38 +404,6 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 }
 
 
-/* -- Button styles -----------------------------------------------------*/
-
-.primary-button,
-.secondary-button {
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-    border-radius: 11px;
-}
-.primary-button {
-    color: #fff;
-    background: #1b98f8;
-}
-.secondary-button {
-    background: #fff;
-    border: 1px solid #aaa;
-    color: #666;
-    font-size: 95%
-}
-
-.danger-button {
-	border-color: #a44;
-	background-color: #d55;
-	color: #fff;
-}
-
-.icon-button {
-	padding: 0.5em;
-	margin: 0 0.2em;
-}
-
-
 /* -- Welcome page-specific formatting -------------------------------------*/
 
 .news-item {
@@ -475,6 +475,10 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 
 #nav {
 	vertical-align: middle;
+}
+
+#plan td {
+	border-left-width: 1px;
 }
 
 .weekend {

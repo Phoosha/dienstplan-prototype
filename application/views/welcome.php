@@ -4,7 +4,7 @@
 <h1>Willkommen <?php echo str_replace(' ', '&nbsp;', $name); ?>!</h1>
 <div id="infoMessage"><?php echo $message; ?></div>
 
-<h2 class="content-subhead">Ankündigungen<?php if ($this->ion_auth->is_admin()): ?>&nbsp;<button title="Erstellen" class="pure-button secondary-button icon-button"><i class="fa-fw fa fa-plus" aria-hidden="true"></i></button></a>
+<h2 class="content-subhead">Ankündigungen<?php if ($this->ion_auth->is_admin()): ?>&nbsp;<a href="<?php echo current_url() ?>#"  title="Erstellen" class="pure-button secondary-button icon-button"><i class="fa-fw fa fa-plus" aria-hidden="true"></i></a>
 <?php endif ?>
 </h2>
 
@@ -17,7 +17,7 @@
 			<h3 class="news-title"><?php echo $news_item['title']; ?></h3>
 			<p class="news-meta">von <?php echo $news_item['author_full']; ?></p>
 <?php if ($this->ion_auth->is_admin()): ?>
-	<a href="<?php echo current_url() ?>#"><button title="Bearbeiten" class="pure-button secondary-button icon-button"><i class="fa-fw fa fa-pencil-square-o" aria-hidden="true"></i></button></a><a href="<?php echo current_url() ?>#"><button title="Löschen" class="pure-button secondary-button icon-button danger-button"><i class="fa-fw fa fa-trash-o" aria-hidden="true"></i></button></a>
+	<a href="<?php echo current_url() ?>#" title="Bearbeiten" class="pure-button secondary-button icon-button"><i class="fa-fw fa fa-pencil-square-o" aria-hidden="true"></i></a><a href="<?php echo current_url() ?>#" title="Löschen" class="pure-button secondary-button icon-button danger-button"><i class="fa-fw fa fa-trash-o" aria-hidden="true"></i></a>
 <?php endif ?>
 		</header>
 		<div class="news-description">

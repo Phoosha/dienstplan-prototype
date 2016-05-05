@@ -14,35 +14,55 @@ $('#menuLink').on('click', function(e) {
  * Make shift slots selectable
  ****************************************************************/
 
-function selectShift(shiftSlot, selected = null) {
+$.fn.classList = function() {
+	if (this.length > 0) {
+		return this.attr('class').split(/\s+/);
+	}
+}
+
+$.fn.shiftID = function() {
+	var classes = this.classList()
+	if (classes) {
+		for (var i = 0; i < classes.length; i++) {
+			if (classes[i].indexOf('shift-id-') === 0) {
+				return classes[i];
+			}
+		}
+	}
+}
+
+$.fn.selectShift = function() {
+	var shiftSlots = this;
+	
 	// filter shifts with multiple selections
-	shiftSlot = $(shiftSlot).filter(function() {
-		return $(shiftSlot).not($(this)).filter('td[name="' + $(this).attr('name') + '"]').length == 0;
+	shiftSlots = shiftSlots.filter(function() {
+		return shiftSlots.not($(this)).filter('td.' + $(this).shiftID()).length === 0;
 	});
 	
-	var checkbox = $(shiftSlot).find('input[type="checkbox"]');
-	if (selected == null) {
-		var selected = !checkbox.prop('checked');
-	}
-	
-	checkbox.prop('checked', selected);
-	$(shiftSlot).toggleClass('selected', selected);
-	
-	// allow only one checkbox to be selected per group (=shift)
-	$('input[name="' + $(checkbox).attr('name') + '"]').not($(checkbox)).prop('checked', false);
-	$('td[name="' + $(shiftSlot).attr('name') + '"]').not($(shiftSlot)).toggleClass('selected', false);
+	return shiftSlots.each(function() {
+		var shiftSlot = $(this);
+		var checkbox = shiftSlot.find('input[type="checkbox"]');
+		var doSelect = ! shiftSlot.hasClass('selected');
+		
+		checkbox.prop('checked', doSelect);
+		shiftSlot.toggleClass('selected', doSelect);
+		
+		// allow only one checkbox to be selected per group (=shift)
+		$('input[name="' + checkbox.attr('name') + '"]').not(checkbox).prop('checked', false);
+		$('td.' + shiftSlot.shiftID()).not(shiftSlot).toggleClass('selected', false);
+	});
 }
 
 // Hide the checkboxes with javascript
 $('input[class="shift-slot-select"]').hide();
 
 // Update the state in case user did selections without js loaded
-selectShift($('td.selectable').has('input[type="checkbox"]:checked'), true);
+$('td.selectable').has('input[type="checkbox"]:checked').selectShift();
 
 // Update checkbox and cell on click and hover
 $('td.shift-slot').on('click', function() {
 	if ($(this).is('.selectable')) {
-		selectShift(this);
+		$(this).selectShift();
 	} else {
 		window.alert("Diese Schicht ist gesperrt!");
 	}
@@ -53,9 +73,9 @@ $('td.shift-slot').on('click', function() {
 });
 
 // Do not change selection when clicking links
-$('td a').on('click', function(event) {
+$('td.shift-slot a').on('click', function(event) {
 	event.stopPropagation();
-}).filter('.selectable').on('mouseenter', function(event) {
+}).on('mouseenter', function(event) {
 	$(this).parentsUntil('tr').addClass('dehover');
 }).on('mouseleave', function(event) {
 	$(this).parents().removeClass('dehover');
@@ -73,6 +93,7 @@ $('td a').on('click', function(event) {
  });
  $('#hider-hide').on('click', function() {
 	 $('tr.hideable').hide();
+	 $('tr.hideable td.selected').selectShift();
 	 $(this).hide();
 	 $('#hider-show').show();
  });

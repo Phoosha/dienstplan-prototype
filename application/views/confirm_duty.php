@@ -3,15 +3,15 @@
 
 <?php echo form_open("plan/save/{$year}/{$month}", 'class="pure-form" id="confirm-duty"'); ?>
 
-<legend class="content-subhead">Dienste so übernehmen?</legend>
+<h2 class="content-subhead">Dienste so übernehmen?</h2>
 
 <div class="wrapper">
 	<fieldset><table class="pure-table">
-		<thead>
+		<thead><tr>
 			<th>Start</th>
 			<th>Ende</th>
 			<th>Fahrzeug</th>
-		</thead>
+		</tr></thead>
 		<tbody>
 	<?php 
 					function add_date($val, $key, $data) {
@@ -47,13 +47,13 @@
 						array_walk($time_list, 'add_date', array(&$end_time_list, $time_list, $end_date));
 					
 						echo '<td>';
-						echo '<label for="'. $j .'-start" class="center">'. $start_wday .', '. $start_date .'<br/></label>';
-						echo form_dropdown("{$j}-start", $start_time_list, $start_date .' '. $start_time);
+						echo '<label class="center" for="'.$j.'-start">'. $start_wday .', '. $start_date .'<br/></label>';
+						echo form_dropdown("{$j}-start", $start_time_list, $start_date .' '. $start_time, 'id="'.$j.'-start"');
 						echo '</td>';
 						
 						echo '<td>';
-						echo '<label for="'. $j .'-start" class="center">'. $end_wday .', '. $end_date .'<br/></label>';
-						echo form_dropdown("{$j}-end", $end_time_list, $end_date .' '. $end_time);
+						echo '<label class="center" for="'.$j.'-end">'. $end_wday .', '. $end_date .'<br/></label>';
+						echo form_dropdown("{$j}-end", $end_time_list, $end_date .' '. $end_time, 'id="'.$j.'-end"');
 						echo '</td>';
 						
 						echo '<td>';
@@ -75,7 +75,7 @@
 	<fieldset class="bottom-wrapper">
 	<?php if ($this->ion_auth->is_admin()): ?>
 		<label for="user_id">Fahrer: </label>
-		<?php echo form_dropdown('user_id', $users, $this->ion_auth->get_user_id()); ?>
+		<?php echo form_dropdown('user_id', $users, $this->ion_auth->get_user_id(), 'id="user_id"'); ?>
 		<label for="outOfService" class="pure-checkbox">
 			<?php echo form_checkbox('outOfService', '1', FALSE, 'id="outOfService"'); ?> außer Dienst (Werkstatt)
 		</label>

@@ -9,7 +9,7 @@
 
 <?php echo form_open("plan/confirm/{$year}/{$month}", 'class="pure-form"'); ?>
 <table class="pure-table pure-table-bordered tight-table" id="plan">
-	<thead>
+	<thead><tr>
 		<th>Tag</th>
 		<th>Schicht</th>
 <?php foreach ($vehicles as $vehicle): ?>
@@ -18,7 +18,7 @@
 <?php if ($allow_add !== 'never'): ?>
 		<th></th>
 <?php endif ?>
-	</thead>
+	</tr></thead>
 	
 	<tbody>
 <?php
@@ -82,7 +82,7 @@
 					}
 					
 					
-					echo "<td class=\"shift-slot {$slot_classes}\" name=\"shift-".$shift_id."\">\n";
+					echo "<td class=\"shift-slot {$slot_classes} shift-id-".$shift_id."\">\n";
 					$this->load->view('shift_slot', array('slot_id' => $slot_id, 'shift_id' => $shift_id, 'add' => $add));
 					echo "</td>\n";
 					
@@ -90,7 +90,7 @@
 				}
 				
 				if ($add) {
-					echo '<td><button type="submit" name="verify" title="Eintragen" class="pure-button secondary-button icon-button fa fa-paper-plane-o" aria-type="hidden" /></td>'."\n";
+					echo '<td><button type="submit" name="verify" title="Eintragen" class="pure-button secondary-button icon-button fa fa-paper-plane-o"></button></td>'."\n";
 				} else if ($allow_add !== 'never') {
 					echo "<td></td>\n";
 				}

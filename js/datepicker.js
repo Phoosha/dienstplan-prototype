@@ -43,11 +43,11 @@ return datepicker.regional.de;
  ****************************************************************/
 $(function() {
 	$.datepicker.setDefaults( $.datepicker.regional[ "de" ] );
-	$("#startdate-picker").datepicker({
+	$("#startdate").datepicker({
 		onClose: function(dateText, inst) { 
 			$(this).attr("disabled", false);
 
-			var endPicker		= $("#enddate-picker");
+			var endPicker		= $("#enddate");
 			var newStartDate	= $(this).datepicker("getDate");
 			var endDate			= $(endPicker).datepicker("getDate");
 
@@ -59,13 +59,13 @@ $(function() {
 			$(this).attr("disabled", true);
 		}
 	});
-	$("#enddate-picker").datepicker({
+	$("#enddate").datepicker({
 		onClose: function(dateText, inst) { 
 			$(this).attr("disabled", false);
 		},
 		beforeShow: function(input, inst) {
 			$(this).attr("disabled", true);
-			$(this).datepicker("option", "minDate", $("#startdate-picker").datepicker("getDate"));
+			$(this).datepicker("option", "minDate", $("#startdate").datepicker("getDate"));
 		}
 	});
 });
