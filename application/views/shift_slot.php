@@ -19,10 +19,18 @@ if (isset($shifts[$slot_id])) {
 		echo "</span>\n";
 		
 		if ($out_of_service) {
-			echo "<span class=\"out-of-service\">Außer Dienst<i class=\"fa fa-wrench inline-icon\" aria-hidden=\"true\"></i></span><br/>\n";
+			echo "<span class=\"out-of-service\">";
+			if (! $shift['duty']['locked']) {
+				echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">";
+			}
+			echo "Außer Dienst";
+			if (! $shift['duty']['locked']) {
+				echo '</a>';
+			}
+			echo "<i class=\"fa fa-wrench inline-icon\" aria-hidden=\"true\"></i></span><br/>\n";
 		}
 		
-		if (! $out_of_service || $this->ion_auth->is_admin()) {
+		if (! $out_of_service) {
 			echo '<span class="duty-user">';
 				if (! $shift['duty']['locked']) {
 					echo '<a href='. site_url('plan/duty/'. $shift['duty']['id']) .">";

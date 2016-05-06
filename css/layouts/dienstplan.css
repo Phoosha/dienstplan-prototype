@@ -133,7 +133,7 @@ label {
     color: #555;
     border-bottom: 1px solid #ddd;
     padding: 0.4em 0;
-    font-size: 80%;
+    font-size: 90%;
     font-weight: 500;
     letter-spacing: 0.1em;
 }
@@ -166,7 +166,7 @@ a:hover {
 
 	#infoMessage p {
 		margin: 0;
-		font-style: bold;
+		font-weight: bold;
 	}
 	
 	.error, .warning {
@@ -190,14 +190,15 @@ a:hover {
     -moz-box-shadow: none;
     box-shadow: none;
     border-radius: 11px;
+    border: 1px solid #aaa;
 }
 .primary-button {
     color: #fff;
-    background: #1b98f8;
+    background: #19f;
+    border-color: #17b
 }
 .secondary-button {
     background: #fff;
-    border: 1px solid #aaa;
     color: #666;
     font-size: 95%
 }
@@ -211,6 +212,10 @@ a:hover {
 .icon-button {
 	padding: 0.5em;
 	margin: 0 0.2em;
+}
+
+.pure-button:hover {
+	text-decoration: none;
 }
 
 
@@ -442,7 +447,7 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 
 #login {
 	text-align: center;
-	margin: 4em auto;
+	margin: 10% auto;
 }
 
 	#login label {
@@ -452,6 +457,10 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 	#login * {
 		margin-left: auto;
 		margin-right: auto;
+	}
+	
+	#login input {
+		display: inline;
 	}
 
 

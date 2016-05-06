@@ -86,7 +86,8 @@
 	</fieldset>
 
 	<fieldset class="bottom-wrapper">
-	<?php echo form_submit('save', 'Alle speichern', 'class="pure-button primary-button"'); ?>
+		<?php echo form_submit('save', 'Alle speichern', 'class="pure-button primary-button"'); ?>
+		<?php if ($origin): ?><a href="<?php echo $origin ?>" class="pure-button secondary-button icon-button"><i class="fa fa-reply" aria-hidden="true"></i> Zurück</a><?php endif ?>
 	</fieldset>
 </div>
 

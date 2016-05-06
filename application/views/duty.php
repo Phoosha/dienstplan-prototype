@@ -4,10 +4,10 @@
 	$edit	= ! empty($id);
 	$legend	= $title;
 	if ($edit) {
-		$button = 'Änderungen speichern';
+		$save_button = 'Änderungen speichern';
 		$action = 'modify';
 	} else {
-		$button = 'Dienst eintragen';
+		$save_button = 'Dienst eintragen';
 		$action = 'add';
 	}
 ?>
@@ -62,7 +62,14 @@
 		</div>
 	</div></fieldset>
 	
-	<?php echo form_submit($action, $button, 'class="pure-button primary-button"'); ?>
-	<?php if ($edit) echo form_submit('delete', 'Dienst löschen', 'class="pure-button secondary-button danger-button" onclick="return confirm(\'Dienst wirklich löschen?\')"'); ?>
+	<fieldset>
+		<?php echo form_submit($action, $save_button, 'class="pure-button primary-button"'); ?>
+		<?php echo form_submit('reset', 'Zurücksetzen', 'class="pure-button secondary-button"'); ?>
+	</fieldset>
+	
+	<fieldset>
+		<?php if ($edit) echo form_submit('delete', 'Dienst löschen', 'class="pure-button primary-button danger-button" onclick="return confirm(\'Dienst wirklich löschen?\')"'); ?>
+		<?php if ($origin): ?><a href="<?php echo $origin ?>" class="pure-button secondary-button icon-button"><i class="fa fa-reply" aria-hidden="true"></i> Zurück</a><?php endif ?>
+	</fieldset>
 	
 </form>

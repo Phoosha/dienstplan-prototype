@@ -183,6 +183,15 @@ class Plan extends CI_Controller {
 			redirect('plan/show', 'redirect');
 		}
 		
+		$this->load->library('user_agent');
+		if (! empty($this->agent->referrer()) && $this->agent->referrer() !== current_url()) {
+			$this->session->set_userdata('origin', $this->agent->referrer());
+			$data['origin'] = $this->agent->referrer();
+		} else {
+			$this->session->unset_userdata('origin');
+			$data['origin'] = false;
+		}
+		
 		// Ensure month/year are valid
 		$adjusted_date	= $this->calendar->adjust_date($month, $year);
 		$month			= $adjusted_date['month'];
@@ -383,13 +392,24 @@ class Plan extends CI_Controller {
 		$data['menu_id']	= 'plan';
 		$data['datepicker']	= true;
 		
+		$this->load->library('user_agent');
+		if (! empty($this->agent->referrer()) && $this->agent->referrer() !== current_url()) {
+			$this->session->set_userdata('origin', $this->agent->referrer());
+			$data['origin'] = $this->agent->referrer();
+		} else {
+			$this->session->unset_userdata('origin');
+			$data['origin'] = false;
+		}
+		
 		$now		= time();
 		$message	= null;
 		
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('<p class="error">', '</p>');
 		
-		if (isset($_POST['add']) || isset($_POST['modify'])) {
+		if (isset($_POST['reset'])) {
+			$_POST = array();
+		} else if (isset($_POST['add']) || isset($_POST['modify'])) {
 			// modify and add require more values
 			$this->form_validation->set_rules('vehicle', 'Fahrzeug', 'required|is_natural');
 			$this->form_validation->set_rules('startdate', 'Dienstanfang', 'required');

@@ -1,6 +1,6 @@
 <?php echo form_open('auth/login', 'class="pure-form pure-form-stacked" id="login"'); ?>
 	<fieldset>
-		<legend>Anmeldung</legend>
+		<h2 class="content-subhead">Anmeldung</h2>
 		
 		<div id="infoMessage"><?php echo $message; ?></div>
 		
